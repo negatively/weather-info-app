@@ -1,0 +1,79 @@
+# -------------------------------
+# ⚙️ Node & Dependencies
+# -------------------------------
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+
+# -------------------------------
+# 🧱 Build Outputs
+# -------------------------------
+dist/
+dist-electron/
+out/
+build/
+release/
+
+# -------------------------------
+# 🧪 Vite & Cache
+# -------------------------------
+.vite/
+.cache/
+.temp/
+tmp/
+*.local
+
+# -------------------------------
+# 🧰 Environment & System Files
+# -------------------------------
+.env
+.env.*.local
+*.swp
+*.swo
+*.tmp
+Thumbs.db
+
+# -------------------------------
+# 💻 Electron Specific
+# -------------------------------
+# Compiled binaries or packaged apps
+*.exe
+*.app
+*.dmg
+*.asar
+
+# Electron Forge / Builder outputs
+*.zip
+*.tar.gz
+*.snap
+*.deb
+*.rpm
+
+# Electron session and dev files
+/.electron
+/electron-builder.yml
+/electron-builder.json
+
+# -------------------------------
+# 🧪 Test & Coverage
+# -------------------------------
+coverage/
+test-results/
+playwright-report/
+
+# -------------------------------
+# ✨ IDE / Editor
+# -------------------------------
+.idea/
+.vscode/
+*.iml
+
+# -------------------------------
+# 📦 OS / Misc
+# -------------------------------
+.DS_Store
+Thumbs.db
