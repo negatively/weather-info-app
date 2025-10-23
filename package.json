@@ -24,6 +24,7 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.1.16",
+    "electron-store": "^11.0.2",
     "electron-updater": "^6.3.9",
     "tailwindcss": "^4.1.16",
     "vue-router": "^4.6.3"

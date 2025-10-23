@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, toRaw } from 'vue'
 
 interface DatabaseConfig {
     host: string
@@ -10,21 +10,30 @@ interface DatabaseConfig {
 
 const formData = ref<DatabaseConfig>({
     host: '127.0.0.1',
-    database: 'gawdata',
-    user: 'root',
-    password: ''
+    database: 'database',
+    user: 'user',
+    password: 'password'
 })
 
 const loadSettings = async () => {
+    const data = await window.api.getDbSettings();
+    formData.value = data;
 
 }
+
 
 const saveSettings = async () => {
-
+    try {
+        await window.api.setDbSettings(toRaw(formData.value))
+        console.log('Settings saved successfully!')
+    } catch (error) {
+        console.error('Failed to save settings:', error)
+    }
 }
 
-const testConnection = async () => {
 
+const testConnection = async () => {
+    console.log('Testing connection with:', formData.value);
 }
 
 onMounted(() => {
