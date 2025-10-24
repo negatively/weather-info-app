@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import ElectronStore from 'electron-store'
+import { initializeStoreHandlers } from './store-handlers'
 
 function createWindow(): void {
   // Create the browser window.
@@ -74,20 +75,4 @@ app.on('window-all-closed', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 const Store = (ElectronStore as any).default || ElectronStore
-const store = new Store({ name: 'config' })
-
-// Load Settings
-ipcMain.handle('get-db-settings', () => {
-  return store.get('dbSettings', {
-    host: '127.0.0.1',
-    database: 'gawdata',
-    user: 'root',
-    password: ''
-  })
-})
-
-// Save Settings
-ipcMain.handle('set-db-settings', (event, settings) => {
-  store.set('dbSettings', settings)
-  return true
-})
+initializeStoreHandlers(ipcMain, Store)
