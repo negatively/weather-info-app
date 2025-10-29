@@ -4,7 +4,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   getDbSettings: () => ipcRenderer.invoke('get-db-settings'),
-  setDbSettings: (settings) => ipcRenderer.invoke('set-db-settings', settings)
+  setDbSettings: (settings) => ipcRenderer.invoke('set-db-settings', settings),
+  testDbConnection: () => ipcRenderer.invoke('test-db-connection'),
+  fetchDataByDate: (date) => ipcRenderer.invoke('fetch-data-by-date', date)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

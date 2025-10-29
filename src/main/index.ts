@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import ElectronStore from 'electron-store'
 import { initializeStoreHandlers } from './store-handlers'
+import { initializeDatabaseHandlers } from './database-handlers'
 
 function createWindow(): void {
   // Create the browser window.
@@ -76,3 +77,4 @@ app.on('window-all-closed', () => {
 // code. You can also put them in separate files and require them here.
 const Store = (ElectronStore as any).default || ElectronStore
 initializeStoreHandlers(ipcMain, Store)
+initializeDatabaseHandlers(ipcMain, Store)

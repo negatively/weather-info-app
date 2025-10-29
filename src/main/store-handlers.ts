@@ -1,6 +1,13 @@
 import { IpcMain } from 'electron'
 import ElectronStore from 'electron-store'
 
+export interface DatabaseConfig {
+  host: string
+  database: string
+  user: string
+  password: string
+}
+
 /**
  * Initializes the ElectronStore instance and sets up the IPC handlers
  * for loading and saving database configuration settings.
@@ -16,7 +23,7 @@ export const initializeStoreHandlers = (
   const store = new ElectronStoreClass({ name: 'config' })
 
   // Define the default settings structure
-  const defaultDBSettings = {
+  const defaultDBSettings: DatabaseConfig = {
     host: '127.0.0.1',
     database: 'gawdata',
     user: 'root',

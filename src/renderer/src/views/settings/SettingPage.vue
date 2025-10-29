@@ -1,12 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, toRaw } from 'vue'
-
-interface DatabaseConfig {
-    host: string
-    database: string
-    user: string
-    password: string
-}
+import { DatabaseConfig } from '@renderer/types/preload';
 
 const formData = ref<DatabaseConfig>({
     host: '127.0.0.1',
@@ -33,7 +27,8 @@ const saveSettings = async () => {
 
 
 const testConnection = async () => {
-    console.log('Testing connection with:', formData.value);
+    const result = await window.api.testDbConnection()
+    alert(result.success ? '✅ ' + result.message : '❌ ' + result.message)
 }
 
 onMounted(() => {
