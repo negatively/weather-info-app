@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 const menuItems = ref([
-  { icon: '🍃', label: 'Air Quality', route: '/' },
+  { icon: '🍃', label: 'Kualitas Udara', route: '/' },
   { icon: '🌆', label: 'PM 2.5', route: '/pm25' },
 ]);
 </script>
@@ -22,7 +22,7 @@ const menuItems = ref([
           class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:bg-zinc-600 hover:text-white transition-colors">
           <span class="text-xl">{{ item.icon }}</span>
         </div>
-        <span class="text-xs text-gray-400 group-hover:text-white mt-1">{{ item.label }}</span>
+        <span class="text-xs text-gray-400 group-hover:text-white mt-1 text-center">{{ item.label }}</span>
       </router-link>
     </nav>
 
