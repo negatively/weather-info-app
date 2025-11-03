@@ -23,12 +23,16 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@headlessui/vue": "^1.7.23",
     "@tailwindcss/vite": "^4.1.16",
+    "chart.js": "^4.5.1",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.3.9",
     "lodash": "^4.17.21",
     "mysql2": "^3.15.3",
+    "pinia": "^3.0.3",
     "tailwindcss": "^4.1.16",
+    "vue-chartjs": "^5.3.2",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
