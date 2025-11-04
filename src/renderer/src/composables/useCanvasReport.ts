@@ -1,0 +1,205 @@
+import { ref, type Ref } from 'vue'
+import templateImage from '@renderer/assets/template.png'
+import dayjs from 'dayjs'
+import 'dayjs/locale/id'
+
+interface SummarizeData {
+  pm25: {
+    avg: number
+    max: number
+    min: number
+    hourMax: string
+    hourMin: string
+  }
+  pm10: {
+    avg: number
+    max: number
+    min: number
+    hourMax: string
+    hourMin: string
+  }
+  o3: {
+    avg: number
+    max: number
+    min: number
+    hourMax: string
+    hourMin: string
+  }
+}
+
+const CANVAS_STYLES = {
+  fonts: {
+    normal: '22px Poppins',
+    bold18: 'bold 18px Poppins',
+    bold26: 'bold 26px Poppins',
+    bold40: 'bold 40px Poppins'
+  },
+  positions: {
+    description: { x: 100, y: 400, maxWidth: 1400, lineHeight: 30 },
+    conclusion: { x: 120, y: 920, maxWidth: 500, lineHeight: 30 },
+    explanation: { x: 720, y: 920, maxWidth: 750, lineHeight: 30 },
+    signature: {
+      date: { x: 250, y: 1412 },
+      name: { x: 250, y: 1457 }
+    }
+  }
+}
+
+export function useCanvasReport() {
+  const canvasRef = ref<HTMLCanvasElement | null>(null)
+
+  const drawWrappedText = (
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    lineHeight: number
+  ) => {
+    const paragraphs = text.split('\\n')
+    let currentY = y
+
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(' ')
+      let line = ''
+
+      for (const word of words) {
+        const testLine = line + (line ? ' ' : '') + word
+        const metrics = ctx.measureText(testLine)
+
+        if (metrics.width > maxWidth && line !== '') {
+          ctx.fillText(line, x, currentY)
+          line = word
+          currentY += lineHeight
+        } else {
+          line = testLine
+        }
+      }
+
+      if (line) {
+        ctx.fillText(line, x, currentY)
+      }
+
+      currentY += lineHeight
+    }
+
+    return currentY
+  }
+
+  const extractHour = (dateTimeString: string | null) => {
+    if (!dateTimeString) return ''
+    return new Date(dateTimeString).getHours().toString().padStart(2, '0')
+  }
+
+  const initCanvas = (summarizeData: Ref<SummarizeData | null>, nameInput: Ref<string>) => {
+    if (!canvasRef.value || !summarizeData.value) return
+    const ctx = canvasRef.value.getContext('2d')
+    if (!ctx) return
+
+    ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
+
+    const img = new Image()
+    img.src = templateImage
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, canvasRef.value!.width, canvasRef.value!.height)
+
+      // Draw description text
+      ctx.font = CANVAS_STYLES.fonts.normal
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'top'
+
+      const description =
+        'Pengukuran dilakukan pada tanggal 02 November 2025 periode pukul 00 WIB hingga 23 WIB di Stasiun Pemantau Atmosfer Global (GAW) (GAW) Bukit Kototabang. Informasi kualitas udara yang dianalisis berdasarkan pantauan alat kualitas udara BAM 1020 untuk monitoring parameter aerosol partikulat debu halus (PM2.5) dan debu (PM10) dan Thermo 49iQ Series untuk monitoring parameter gas reaktif ozon permukaan (O3).'
+      drawWrappedText(
+        ctx,
+        description,
+        CANVAS_STYLES.positions.description.x,
+        CANVAS_STYLES.positions.description.y,
+        CANVAS_STYLES.positions.description.maxWidth,
+        CANVAS_STYLES.positions.description.lineHeight
+      )
+
+      const conclusion = 'Nilai konsentrasi parameter PM10 dan PM2.5 berada pada kategori BAIK.'
+      drawWrappedText(
+        ctx,
+        conclusion,
+        CANVAS_STYLES.positions.conclusion.x,
+        CANVAS_STYLES.positions.conclusion.y,
+        CANVAS_STYLES.positions.conclusion.maxWidth,
+        CANVAS_STYLES.positions.conclusion.lineHeight
+      )
+
+      const explanation = `Rata-rata Konsentrasi  PM2.5  sebesar ${summarizeData.value?.pm25.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${summarizeData.value?.pm25.max}  µg/m3  terjadi pada pukul ${extractHour(summarizeData.value.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${summarizeData.value?.pm25.min} µg/m3 terjadi pada pukul ${extractHour(summarizeData.value?.pm25.hourMin)}.`
+
+      drawWrappedText(
+        ctx,
+        explanation,
+        CANVAS_STYLES.positions.explanation.x,
+        CANVAS_STYLES.positions.explanation.y,
+        CANVAS_STYLES.positions.explanation.maxWidth,
+        CANVAS_STYLES.positions.explanation.lineHeight
+      )
+
+      // Draw signature
+      ctx.font = CANVAS_STYLES.fonts.bold18
+      dayjs.locale('id')
+      const formattedDate = dayjs().format('DD MMMM YYYY HH.mm [WIB]')
+      ctx.fillText(
+        formattedDate,
+        CANVAS_STYLES.positions.signature.date.x,
+        CANVAS_STYLES.positions.signature.date.y
+      )
+      ctx.fillText(
+        nameInput.value,
+        CANVAS_STYLES.positions.signature.name.x,
+        CANVAS_STYLES.positions.signature.name.y
+      )
+
+      if (summarizeData.value) {
+        // Draw values
+        ctx.font = CANVAS_STYLES.fonts.bold40
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        // Draw averages
+        const data = summarizeData.value
+        ctx.fillText(Math.round(data.pm25.avg).toString(), 250, 730)
+        ctx.fillText(Math.round(data.pm10.avg).toString(), 740, 730)
+        ctx.fillText(Math.round(data.o3.avg).toString(), 1225, 730)
+
+        ctx.font = CANVAS_STYLES.fonts.bold26
+        // Draw max/min values
+        ctx.fillText(Math.round(data.pm25.max).toString(), 360, 695)
+        ctx.fillText(Math.round(data.pm10.max).toString(), 850, 695)
+        ctx.fillText(Math.round(data.o3.max).toString(), 1335, 695)
+
+        ctx.fillText(Math.round(data.pm25.min).toString(), 475, 695)
+        ctx.fillText(Math.round(data.pm10.min).toString(), 960, 695)
+        ctx.fillText(Math.round(data.o3.min).toString(), 1445, 695)
+
+        // Draw hours
+        ctx.fillText(extractHour(data.pm25.hourMax), 360, 765)
+        ctx.fillText(extractHour(data.pm10.hourMax), 850, 765)
+        ctx.fillText(extractHour(data.o3.hourMax), 1335, 765)
+
+        ctx.fillText(extractHour(data.pm25.hourMin), 475, 765)
+        ctx.fillText(extractHour(data.pm10.hourMin), 960, 765)
+        ctx.fillText(extractHour(data.o3.hourMin), 1445, 765)
+      }
+    }
+  }
+
+  const downloadReport = () => {
+    if (!canvasRef.value) return
+    const link = document.createElement('a')
+    link.download = `air-quality-report-${Date.now()}.png`
+    link.href = canvasRef.value.toDataURL('image/png')
+    link.click()
+  }
+
+  return {
+    canvasRef,
+    initCanvas,
+    downloadReport
+  }
+}
