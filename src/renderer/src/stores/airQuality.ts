@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const useAirQualityStore = defineStore('airQuality', () => {
   const processed = ref<any>(null)
   const summarize = ref<any>(null)
+  const date = ref<any>(null)
 
   const setSummarize = (data: any) => {
     summarize.value = data
@@ -13,10 +14,16 @@ export const useAirQualityStore = defineStore('airQuality', () => {
     processed.value = data
   }
 
+  const setDate = (data: any) => {
+    date.value = data
+  }
+
   return {
     summarize,
     setSummarize,
     processed,
-    setProcessed
+    setProcessed,
+    date,
+    setDate
   }
 })

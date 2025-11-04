@@ -5,16 +5,17 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import templateImage from '@renderer/assets/template.png'
+import dayjs from "dayjs";
+import "dayjs/locale/id";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const airQualityStore = useAirQualityStore();
-const { summarize, processed } = storeToRefs(airQualityStore);
+const { summarize, processed, date } = storeToRefs(airQualityStore);
 
 const hasData = computed(() => summarize.value !== null);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const nameInput = ref('');
-const currentDate = ref(new Date().toLocaleDateString());
 
 // Canvas functions
 const initCanvas = () => {
@@ -48,10 +49,12 @@ const initCanvas = () => {
         const explanation = 'Rata-rata Konsentrasi  PM2.5  sebesar 6  µg/m3. \nKonsentrasi tertinggi sebesar 13  µg/m3  terjadi pada pukul 21 \ndan konsentrasi  terendah sebesar 2 µg/m3 terjadi pada pukul 15.\n\nRata-rata Konsentrasi  PM2.5  sebesar 6  µg/m3. \nKonsentrasi tertinggi sebesar 13  µg/m3  terjadi pada pukul 21 \ndan konsentrasi  terendah sebesar 2 µg/m3 terjadi pada pukul 15.\n\nRata-rata Konsentrasi  PM2.5  sebesar 6  µg/m3. \nKonsentrasi tertinggi sebesar 13  µg/m3  terjadi pada pukul 21 \ndan konsentrasi  terendah sebesar 2 µg/m3 terjadi pada pukul 15.'
 
         drawWrappedText(ctx, explanation, 720, 920, 750, 30)
-        // ctx.fillText(`Name: ${nameInput.value}`, canvasRef.value!.width / 2, 200);
 
-        // // Draw date
-        // ctx.fillText(`Date: ${currentDate.value}`, canvasRef.value!.width / 2, 250);
+        ctx.font = 'bold 18px Poppins'
+        dayjs.locale("id");
+        const formattedDate = dayjs().format("DD MMMM YYYY HH.mm [WIB]");
+        ctx.fillText(`${formattedDate}`, 250, 1412);
+        ctx.fillText(`${nameInput.value}`, 250, 1457);
 
         // Draw data
         if (summarize.value) {
@@ -210,7 +213,7 @@ const drawWrappedText = (
 }
 
 // Watch for changes
-watch([nameInput, currentDate, summarize], () => {
+watch([nameInput, summarize], () => {
     initCanvas();
 }, { deep: true });
 
@@ -233,27 +236,30 @@ onMounted(() => {
                 <canvas ref="canvasRef" class="w-full h-full" width="1600" height="1600"></canvas>
             </div>
         </div>
-        <div class="w-1/4 flex-1 border border-zinc-600 mt-2 mr-2 rounded-2xl p-4">
+        <div class="w-1/4 flex-1 border border-zinc-600 mt-2 mr-2 rounded-2xl p-4 ">
             <div class="flex-1">
-                <input type="text" v-model="nameInput" placeholder="Enter name"
-                    class="w-full px-4 py-2 rounded-lg border border-zinc-300 focus:outline-none focus:border-teal-500" />
+                <div class="relative">
+                    <input v-model="nameInput" type="text" id="name" name="name" placeholder=" "
+                        class=" w-full px-4 pt-6 pb-2 rounded-lg border border-zinc-300 focus:outline-none focus:border-teal-500 transition-all" />
+                    <label for="name"
+                        class="absolute left-4 top-2 text-xs text-neutral-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-neutral-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-neutral-400">
+                        Nama Pengolah
+                    </label>
+                </div>
             </div>
-            <div class="flex-1">
-                <input type="text" v-model="currentDate" readonly
-                    class="w-full px-4 py-2 rounded-lg border border-zinc-300 bg-zinc-50" />
-            </div>
-            <div class="flex flex-col">
 
-                <button @click="downloadCertificate"
-                    class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+            <div class="flex flex-col gap-2 mt-2">
+
+                <button @click="() => { }"
+                    class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
                     Accept
                 </button>
-                <button @click="downloadCertificate"
+                <!-- <button @click="downloadCertificate"
                     class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
                     Edit
-                </button>
-                <button @click="downloadCertificate"
-                    class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                </button> -->
+                <button @click="() => { }"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                     Reject
                 </button>
             </div>

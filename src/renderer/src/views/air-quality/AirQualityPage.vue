@@ -16,7 +16,10 @@ const showModal = ref(false)
 const modalMessage = ref('')
 
 const handleGenerate = async () => {
-    const result = await fetchRawData(date.value)
+    const prev = new Date(date.value)
+    prev.setDate(prev.getDate() - 1)
+    const prevDate = prev.toISOString().slice(0, 10)
+    const result = await fetchRawData(prevDate)
 
     if (!result.success) {
         modalMessage.value = "Server tidak terkoneksi dengan baik"
@@ -33,6 +36,7 @@ const handleGenerate = async () => {
 
     airQualityStore.setProcessed(cleansing)
     airQualityStore.setSummarize(summarize)
+    airQualityStore.setDate(date.value)
     router.push({ name: 'air-quality.preview' })
 
 }
