@@ -2,6 +2,8 @@ import { ref, type Ref } from 'vue'
 import templateImage from '@renderer/assets/template.png'
 import dayjs from 'dayjs'
 import 'dayjs/locale/id'
+import { ipcRenderer } from 'electron'
+import { SavedReport } from 'src/shared/types/store'
 
 interface SummarizeData {
   pm25: {
@@ -197,9 +199,26 @@ export function useCanvasReport() {
     link.click()
   }
 
+  const saveReport = async (analystName: string) => {
+    if (!canvasRef.value) {
+      console.error('Canvas not found')
+      return
+    }
+
+    const base64Image = canvasRef.value.toDataURL('image/png')
+
+    const now = new Date().toISOString()
+    const report: SavedReport = {
+      imagePath: '',
+      createdAt: now,
+      analystName: analystName
+    }
+    const result = window.api.saveReport(report, base64Image)
+  }
   return {
     canvasRef,
     initCanvas,
-    downloadReport
+    downloadReport,
+    saveReport
   }
 }

@@ -1,12 +1,8 @@
 import { IpcMain } from 'electron'
 import ElectronStore from 'electron-store'
-
-export interface DatabaseConfig {
-  host: string
-  database: string
-  user: string
-  password: string
-}
+import { saveReportImage, deleteReportImage } from './report-handlers'
+import fs from 'fs'
+import { DatabaseConfig, SavedReport } from '../shared/types/store'
 
 /**
  * Initializes the ElectronStore instance and sets up the IPC handlers
@@ -21,6 +17,7 @@ export const initializeStoreHandlers = (
 ): void => {
   // Initialize the Store instance
   const store = new ElectronStoreClass({ name: 'config' })
+  const ImageStore = new ElectronStoreClass({ name: 'reports' })
 
   // Define the default settings structure
   const defaultDBSettings: DatabaseConfig = {
@@ -38,9 +35,75 @@ export const initializeStoreHandlers = (
   })
 
   // IPC Handler: Save Settings
-  ipcMain.handle('set-db-settings', (event, settings) => {
+  ipcMain.handle('set-db-settings', (_event, settings) => {
     console.log('[Store Handler] Saving new DB settings:', settings)
     store.set('dbSettings', settings)
     return true
+  })
+
+  // IPC Handler: Get Saved Reports
+  ipcMain.handle('get-saved-reports', () => {
+    console.log('[Store Handler] Loading saved reports.')
+    return store.get('savedReports', [] as SavedReport[])
+  })
+
+  // IPC Handler: Save Report
+  ipcMain.handle(
+    'save-report',
+    (_event, { report, imageData }: { report: SavedReport; imageData: string }) => {
+      console.log('[Store Handler] Saving new report:', report.createdAt)
+
+      try {
+        // Save the image file
+        const fileName = `report-${report.createdAt}.png`
+        const imagePath = saveReportImage(imageData, fileName)
+
+        // Update the report with the correct image path
+        const reportToSave = {
+          ...report,
+          imagePath
+        }
+
+        // Save to store
+        const reports = ImageStore.get('AirQualityReports', [] as SavedReport[]) as SavedReport[]
+        reports.push(reportToSave)
+        ImageStore.set('AirQualityReports', reports)
+
+        return { success: true, message: reportToSave }
+      } catch (error) {
+        console.error('[Store Handler] Error saving report:', error)
+        return { success: false, message: 'Failed to save report' }
+      }
+    }
+  )
+
+  // IPC Handler: Delete Report
+  ipcMain.handle('delete-report', (_event, reportId: string) => {
+    console.log('[Store Handler] Deleting report:', reportId)
+    const reports = store.get('savedReports', [] as SavedReport[]) as SavedReport[]
+    const reportToDelete = reports.find((report) => report.id === reportId)
+
+    if (reportToDelete) {
+      // Delete the image file
+      deleteReportImage(reportToDelete.imagePath)
+
+      // Update the store
+      const updatedReports = reports.filter((report) => report.id !== reportId)
+      store.set('savedReports', updatedReports)
+      return { success: true }
+    }
+
+    return { success: false, error: 'Report not found' }
+  })
+
+  // IPC Handler: Get Report Image
+  ipcMain.handle('get-report-image', (_event, filePath: string) => {
+    try {
+      const imageBuffer = fs.readFileSync(filePath)
+      return `data:image/png;base64,${imageBuffer.toString('base64')}`
+    } catch (error) {
+      console.error('[Store Handler] Error reading report image:', error)
+      return null
+    }
   })
 }

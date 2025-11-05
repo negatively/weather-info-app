@@ -1,7 +1,7 @@
 import { IpcMain } from 'electron'
 import ElectronStore from 'electron-store'
 import mysql from 'mysql2/promise'
-import { DatabaseConfig } from './store-handlers'
+import { DatabaseConfig } from '../shared/types/store'
 import type { RawAirQuality, RawOzon, RawPM10, RawPM25 } from '../shared/types/airquality'
 
 /**

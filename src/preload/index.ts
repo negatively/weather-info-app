@@ -3,10 +3,18 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
+  // Database settings
   getDbSettings: () => ipcRenderer.invoke('get-db-settings'),
   setDbSettings: (settings) => ipcRenderer.invoke('set-db-settings', settings),
   testDbConnection: () => ipcRenderer.invoke('test-db-connection'),
-  fetchDataByDate: (date) => ipcRenderer.invoke('fetch-data-by-date', date)
+  fetchDataByDate: (date) => ipcRenderer.invoke('fetch-data-by-date', date),
+
+  // Report management
+  getSavedReports: () => ipcRenderer.invoke('get-saved-reports'),
+  saveReport: (report: any, imageData: string) =>
+    ipcRenderer.invoke('save-report', { report, imageData }),
+  deleteReport: (reportId: string) => ipcRenderer.invoke('delete-report', reportId),
+  getReportImage: (filePath: string) => ipcRenderer.invoke('get-report-image', filePath)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

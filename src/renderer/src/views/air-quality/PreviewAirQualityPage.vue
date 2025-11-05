@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useAirQualityStore } from '@renderer/stores/airQuality';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { useCanvasReport } from '@renderer/composables/useCanvasReport';
 import { useAirQualityChart, chartOptions } from '@renderer/composables/useAirQualityChart';
+import AlertModal from '@renderer/components/AlertModal.vue';
+import router from '@renderer/router';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -13,8 +15,13 @@ const airQualityStore = useAirQualityStore();
 const { summarize, processed, date } = storeToRefs(airQualityStore);
 const nameInput = ref('');
 
+
+// Modal
+const showModal = ref(false)
+const modalMessage = ref('')
+
 // Initialize canvas composable
-const { canvasRef, initCanvas, downloadReport } = useCanvasReport();
+const { canvasRef, initCanvas, downloadReport, saveReport } = useCanvasReport();
 
 // Initialize chart composable
 const { chartData } = useAirQualityChart(processed.value);
@@ -27,6 +34,17 @@ watch([nameInput, summarize], () => {
 onMounted(() => {
     initCanvas(summarize, nameInput);
 });
+
+const saveButton = () => {
+    if (nameInput.value == '') {
+        modalMessage.value = "Mohon Isi Nama Analis Terlebih Dahulu"
+        showModal.value = true
+    } else {
+        saveReport(nameInput.value)
+        router.push({ name: 'air-quality' })
+    }
+}
+
 </script>
 
 <template>
@@ -57,7 +75,7 @@ onMounted(() => {
 
             <div class="flex flex-col gap-2 mt-2">
 
-                <button @click="() => { }"
+                <button @click="saveButton"
                     class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
                     Accept
                 </button>
@@ -72,4 +90,5 @@ onMounted(() => {
             </div>
         </div>
     </div>
+    <AlertModal v-model:show="showModal" title="Error" :message="modalMessage"></AlertModal>
 </template>
