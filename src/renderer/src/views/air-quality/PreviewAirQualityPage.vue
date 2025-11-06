@@ -45,6 +45,10 @@ const saveButton = () => {
     }
 }
 
+const rejectButton = () => {
+    router.push({ name: 'air-quality' })
+}
+
 </script>
 
 <template>
@@ -54,11 +58,11 @@ const saveButton = () => {
     </div>
     <div class="flex">
         <div class="w-3/4 mt-2">
-            <div class="h-60 border border-zinc-600 mb-2 mr-2 rounded-2xl p-4">
-                <Line :data="chartData" :options="chartOptions" class="h-full w-full" />
-            </div>
             <div class="min-h-100 border border-zinc-600 mr-2 rounded-2xl p-4">
                 <canvas ref="canvasRef" class="w-full h-full" width="1600" height="1600"></canvas>
+            </div>
+            <div class="h-60 border border-zinc-600 mt-2 mr-2 rounded-2xl p-4">
+                <Line :data="chartData" :options="chartOptions" class="h-full w-full" />
             </div>
         </div>
         <div class="w-1/4 flex-1 border border-zinc-600 mt-2 mr-2 rounded-2xl p-4 ">
@@ -79,13 +83,17 @@ const saveButton = () => {
                     class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
                     Accept
                 </button>
-                <button @click="downloadReport"
+                <!-- <button @click="downloadReport"
                     class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
                     Download Report
-                </button>
-                <button @click="() => { }"
+                </button> -->
+                <button @click="rejectButton"
                     class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                     Reject
+                </button>
+                <button @click="rejectButton"
+                    class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                    Edit
                 </button>
             </div>
         </div>

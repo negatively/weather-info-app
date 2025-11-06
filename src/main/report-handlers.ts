@@ -32,6 +32,7 @@ export const saveReportImage = (base64Data: string, fileName: string): string =>
   const base64Image = base64Data.replace(/^data:image\/\w+;base64,/, '')
 
   // Save the image
+
   fs.writeFileSync(filePath, base64Image, { encoding: 'base64' })
 
   return filePath

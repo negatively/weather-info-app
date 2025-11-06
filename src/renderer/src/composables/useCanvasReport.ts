@@ -2,7 +2,6 @@ import { ref, type Ref } from 'vue'
 import templateImage from '@renderer/assets/template.png'
 import dayjs from 'dayjs'
 import 'dayjs/locale/id'
-import { ipcRenderer } from 'electron'
 import { SavedReport } from 'src/shared/types/store'
 
 interface SummarizeData {
@@ -102,13 +101,20 @@ export function useCanvasReport() {
 
     const img = new Image()
     img.src = templateImage
-    img.onload = () => {
+    img.onload = async () => {
+      // Pastikan font Poppins sudah ter-load
+      ;(await document.fonts.load('16px "Poppins"'),
+        await document.fonts.load('22px "Poppins"'),
+        await document.fonts.load('bold 16px "Poppins"'),
+        await document.fonts.load('bold 40px "Poppins"'),
+        await document.fonts.ready)
       ctx.drawImage(img, 0, 0, canvasRef.value!.width, canvasRef.value!.height)
 
       // Draw description text
       ctx.font = CANVAS_STYLES.fonts.normal
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
+      ctx.fillStyle = '#2E75B6'
 
       const description =
         'Pengukuran dilakukan pada tanggal 02 November 2025 periode pukul 00 WIB hingga 23 WIB di Stasiun Pemantau Atmosfer Global (GAW) (GAW) Bukit Kototabang. Informasi kualitas udara yang dianalisis berdasarkan pantauan alat kualitas udara BAM 1020 untuk monitoring parameter aerosol partikulat debu halus (PM2.5) dan debu (PM10) dan Thermo 49iQ Series untuk monitoring parameter gas reaktif ozon permukaan (O3).'
@@ -163,20 +169,49 @@ export function useCanvasReport() {
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
 
-        // Draw averages
+        ctx.save()
+        // avg pm2.5
+        ctx.fillStyle = getColorPM25(16)
+        ctx.fillRect(200, 665, 102, 112)
+        // avg pm10
+        ctx.fillStyle = getColorPM10(summarizeData.value.pm10.avg)
+        ctx.fillRect(685, 665, 104, 112)
+
+        // max pm2.5
+        ctx.fillStyle = getColorPM25(summarizeData.value.pm25.max)
+        ctx.fillRect(310, 665, 103, 55)
+        // max pm10
+        ctx.fillStyle = getColorPM10(summarizeData.value.pm10.max)
+        ctx.fillRect(799, 665, 102, 55)
+
+        // min pm2.5
+        ctx.fillStyle = getColorPM25(summarizeData.value.pm25.min)
+        ctx.fillRect(422, 665, 102, 55)
+        // min pm10
+        ctx.fillStyle = getColorPM25(summarizeData.value.pm10.min)
+        ctx.fillRect(910, 665, 102, 55)
+
+        // Value
+        ctx.fillStyle = '#fff'
         const data = summarizeData.value
         ctx.fillText(Math.round(data.pm25.avg).toString(), 250, 730)
         ctx.fillText(Math.round(data.pm10.avg).toString(), 740, 730)
+        ctx.fillText(Math.round(data.pm25.max).toString(), 360, 695)
+        ctx.fillText(Math.round(data.pm10.max).toString(), 850, 695)
+        ctx.fillText(Math.round(data.pm25.min).toString(), 475, 695)
+        ctx.fillText(Math.round(data.pm10.min).toString(), 960, 695)
+
+        ctx.restore()
+
+        // Draw averages
+
         ctx.fillText(Math.round(data.o3.avg).toString(), 1225, 730)
 
         ctx.font = CANVAS_STYLES.fonts.bold26
         // Draw max/min values
-        ctx.fillText(Math.round(data.pm25.max).toString(), 360, 695)
-        ctx.fillText(Math.round(data.pm10.max).toString(), 850, 695)
+
         ctx.fillText(Math.round(data.o3.max).toString(), 1335, 695)
 
-        ctx.fillText(Math.round(data.pm25.min).toString(), 475, 695)
-        ctx.fillText(Math.round(data.pm10.min).toString(), 960, 695)
         ctx.fillText(Math.round(data.o3.min).toString(), 1445, 695)
 
         // Draw hours
@@ -207,13 +242,31 @@ export function useCanvasReport() {
 
     const base64Image = canvasRef.value.toDataURL('image/png')
 
-    const now = new Date().toISOString()
+    dayjs.locale('id')
+    const date = dayjs()
+    const formattedDate = date.format('DD MMMM YYYY HH.mm [WIB]')
     const report: SavedReport = {
+      id: date.toISOString(),
       imagePath: '',
-      createdAt: now,
+      createdAt: formattedDate,
       analystName: analystName
     }
+
     const result = window.api.saveReport(report, base64Image)
+  }
+
+  const getColorPM25 = (value) => {
+    if (value >= 0 && value <= 15.5) return 'rgb(0,204,0)' // hijau
+    if (value >= 15.6 && value <= 55.4) return 'rgb(0,51,255)' // biru
+    if (value >= 55.5 && value <= 150.4) return 'rgb(255,201,0)' // kuning
+    return 'gray'
+  }
+
+  const getColorPM10 = (value) => {
+    if (value >= 0 && value <= 50) return 'rgb(0,204,0)' // hijau
+    if (value >= 51 && value <= 150) return 'rgb(0,51,255)' // biru
+    if (value >= 151 && value <= 350) return 'rgb(255,201,0)' // kuning
+    return 'gray'
   }
   return {
     canvasRef,

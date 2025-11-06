@@ -6,6 +6,7 @@ export interface DatabaseConfig {
 }
 
 export interface SavedReport {
+  id: string
   imagePath: string
   createdAt: string
   analystName: string

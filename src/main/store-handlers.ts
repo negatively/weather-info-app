@@ -44,7 +44,7 @@ export const initializeStoreHandlers = (
   // IPC Handler: Get Saved Reports
   ipcMain.handle('get-saved-reports', () => {
     console.log('[Store Handler] Loading saved reports.')
-    return store.get('savedReports', [] as SavedReport[])
+    return ImageStore.get('AirQualityReports', [] as SavedReport[])
   })
 
   // IPC Handler: Save Report
@@ -78,18 +78,18 @@ export const initializeStoreHandlers = (
   )
 
   // IPC Handler: Delete Report
-  ipcMain.handle('delete-report', (_event, reportId: string) => {
-    console.log('[Store Handler] Deleting report:', reportId)
-    const reports = store.get('savedReports', [] as SavedReport[]) as SavedReport[]
-    const reportToDelete = reports.find((report) => report.id === reportId)
+  ipcMain.handle('delete-report', (_event, reportCreatedAt: string) => {
+    console.log('[Store Handler] Deleting report:', reportCreatedAt)
+    const reports = ImageStore.get('AirQualityReports', [] as SavedReport[]) as SavedReport[]
+    const reportToDelete = reports.find((report) => report.createdAt === reportCreatedAt)
 
     if (reportToDelete) {
       // Delete the image file
       deleteReportImage(reportToDelete.imagePath)
 
       // Update the store
-      const updatedReports = reports.filter((report) => report.id !== reportId)
-      store.set('savedReports', updatedReports)
+      const updatedReports = reports.filter((report) => report.createdAt !== reportCreatedAt)
+      store.set('AirQualityReports', updatedReports)
       return { success: true }
     }
 

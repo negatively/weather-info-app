@@ -1,3 +1,5 @@
+import { SavedReport } from 'src/shared/types/store'
+
 export interface DatabaseConfig {
   host: string
   database: string
@@ -13,6 +15,8 @@ declare global {
       testDbConnection: () => Promise<{ success: boolean; message: string }>
       fetchDataByDate: () => Promise<{ success: boolean; data: any; message: string }>
       saveReport: (report: any, imageData: string) => Promise<{ success: boolean; message: string }>
+      getSavedReports: () => Promise<SavedReport[]>
+      getReportImage: (path: string) => Promise<string>
     }
   }
 }

@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import ImageResultCard from '@renderer/components/ImageResultCard.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { fetchRawData, avgByHour, summarizeDaily, dataCleansing } from '@renderer/services/data.service';
 import AlertModal from '@renderer/components/AlertModal.vue';
 import ImagePreviewModal from '@renderer/components/ImagePreviewModal.vue';
 import router from '@renderer/router';
 import { useAirQualityStore } from '@renderer/stores/airQuality';
+import { SavedReport } from 'src/shared/types/store';
 
 const airQualityStore = useAirQualityStore();
 const currentDate = new Date().toISOString().slice(0, 10);
 const date = ref(currentDate)
-
+const listReport = ref<SavedReport[]>([])
 // Modal
 const showModal = ref(false)
 const modalMessage = ref('')
+
 
 const handleGenerate = async () => {
     const prev = new Date(date.value)
@@ -40,6 +42,21 @@ const handleGenerate = async () => {
     router.push({ name: 'air-quality.preview' })
 
 }
+
+onMounted(async () => {
+    const reports = await window.api.getSavedReports();
+    const reportsWithImage = await Promise.all(
+        reports.map(async (r) => ({
+            ...r,
+            imageBase64: await window.api.getReportImage(r.imagePath)
+        }))
+    )
+    listReport.value = reportsWithImage
+})
+
+const showPicker = (event) => {
+    if (event.target.showPicker) event.target.showPicker()
+}
 </script>
 <template>
     <div class="relative mt-10">
@@ -51,9 +68,9 @@ const handleGenerate = async () => {
             @submit.prevent="handleGenerate">
             <div class="space-y-4">
                 <div class="relative">
-                    <input v-model="date" type="date" id="date" name="date"
+                    <input v-model="date" type="date" id="date" name="date" @focus="showPicker"
                         class="peer w-full px-4 pt-6 pb-2 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-transparent transition-all" />
-                    <label for="date" class="absolute left-4 top-2 text-xs text-neutral-400">
+                    <label for="date" class="absolute left-4 top-2 text-xs text-neutral-400  pointer-events-none">
                         Tanggal
                     </label>
                 </div>
@@ -73,12 +90,11 @@ const handleGenerate = async () => {
         <div class="p-4">
             <h1 class="text-base font-semibold text-white">Result</h1>
         </div>
-        <div class="flex flex-wrap">
-            <ImageResultCard image="https://picsum.photos/300/200" title="25 Januari 2025" />
+        <div class="flex flex-wrap gap-3">
+            <ImageResultCard v-for="report in listReport" :image="report.imageBase64" :title="report.createdAt" />
         </div>
-
-
     </div>
+
     <AlertModal v-model:show="showModal" title="Error" :message="modalMessage"></AlertModal>
     <ImagePreviewModal />
 </template>
