@@ -27,12 +27,12 @@ const { canvasRef, initCanvas, downloadReport, saveReport } = useCanvasReport();
 const { chartData } = useAirQualityChart(processed.value);
 
 // Watch for changes
-watch([nameInput, summarize], () => {
-    initCanvas(summarize, nameInput);
+watch([nameInput, summarize, date], () => {
+    initCanvas(summarize, nameInput, date);
 }, { deep: true });
 
 onMounted(() => {
-    initCanvas(summarize, nameInput);
+    initCanvas(summarize, nameInput, date);
 });
 
 const saveButton = () => {
@@ -43,6 +43,10 @@ const saveButton = () => {
         saveReport(nameInput.value)
         router.push({ name: 'air-quality' })
     }
+}
+
+const editButton = () => {
+    router.push({ name: 'air-quality.edit' })
 }
 
 const rejectButton = () => {
@@ -91,7 +95,7 @@ const rejectButton = () => {
                     class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                     Reject
                 </button>
-                <button @click="rejectButton"
+                <button @click="editButton"
                     class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
                     Edit
                 </button>

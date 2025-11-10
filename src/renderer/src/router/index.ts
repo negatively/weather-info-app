@@ -4,6 +4,7 @@ import AirQualityPage from '@renderer/views/air-quality/AirQualityPage.vue'
 import SettingPage from '@renderer/views/settings/SettingPage.vue'
 import PM25Page from '@renderer/views/pm25/PM25Page.vue'
 import PreviewAirQualityPage from '@renderer/views/air-quality/PreviewAirQualityPage.vue'
+import EditAirQualityPage from '@renderer/views/air-quality/EditAirQualityPage.vue'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -20,6 +21,11 @@ const router = createRouter({
           path: 'air-quality/preview',
           name: 'air-quality.preview',
           component: PreviewAirQualityPage
+        },
+        {
+          path: 'air-quality/edit',
+          name: 'air-quality.edit',
+          component: EditAirQualityPage
         }
       ]
     }
