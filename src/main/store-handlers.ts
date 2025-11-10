@@ -1,4 +1,4 @@
-import { IpcMain } from 'electron'
+import { clipboard, IpcMain, nativeImage, shell } from 'electron'
 import ElectronStore from 'electron-store'
 import { saveReportImage, deleteReportImage } from './report-handlers'
 import fs from 'fs'
@@ -44,7 +44,13 @@ export const initializeStoreHandlers = (
   // IPC Handler: Get Saved Reports
   ipcMain.handle('get-saved-reports', () => {
     console.log('[Store Handler] Loading saved reports.')
-    return ImageStore.get('AirQualityReports', [] as SavedReport[])
+    const reports = ImageStore.get('AirQualityReports', []) as SavedReport[]
+    // Sort newest first, then take only the top 2
+    const newestReports = reports
+      .sort((a, b) => new Date(b.id).getTime() - new Date(a.id).getTime())
+      .slice(0, 2)
+
+    return newestReports
   })
 
   // IPC Handler: Save Report
@@ -104,6 +110,28 @@ export const initializeStoreHandlers = (
     } catch (error) {
       console.error('[Store Handler] Error reading report image:', error)
       return null
+    }
+  })
+
+  ipcMain.handle('copy-image-and-caption', async (_event, { imageBase64, title }) => {
+    try {
+      const image = nativeImage.createFromDataURL(imageBase64)
+
+      // Clear first (good hygiene)
+      clipboard.clear()
+
+      // Copy both image and text
+      clipboard.write({
+        image,
+        text: title,
+        bookmark: 'Report Image' // optional metadata
+      })
+
+      console.log('[Clipboard] Image and caption copied successfully.')
+      return { success: true }
+    } catch (error) {
+      console.error('[Clipboard] Error copying image and caption:', error)
+      return { success: false, error: String(error) }
     }
   })
 }
