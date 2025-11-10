@@ -92,10 +92,17 @@ export function useCanvasReport() {
     return new Date(dateTimeString).getHours().toString().padStart(2, '0')
   }
 
-  const initCanvas = (summarizeData: Ref<SummarizeData | null>, nameInput: Ref<string>) => {
+  const initCanvas = (
+    summarizeData: Ref<SummarizeData | null>,
+    nameInput: Ref<string>,
+    date: Ref<any>
+  ) => {
     if (!canvasRef.value || !summarizeData.value) return
     const ctx = canvasRef.value.getContext('2d')
     if (!ctx) return
+
+    dayjs.locale('id')
+    const dataDate = dayjs(date.value).subtract(1, 'D').format('DD MMMM YYYY')
 
     ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
 
@@ -110,14 +117,18 @@ export function useCanvasReport() {
         await document.fonts.ready)
       ctx.drawImage(img, 0, 0, canvasRef.value!.width, canvasRef.value!.height)
 
+      ctx.font = CANVAS_STYLES.fonts.bold40
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'top'
+      ctx.fillStyle = '#01729A'
+      ctx.fillText(dataDate, 800, 325)
+
       // Draw description text
       ctx.font = CANVAS_STYLES.fonts.normal
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
-      ctx.fillStyle = '#2E75B6'
 
-      const description =
-        'Pengukuran dilakukan pada tanggal 02 November 2025 periode pukul 00 WIB hingga 23 WIB di Stasiun Pemantau Atmosfer Global (GAW) (GAW) Bukit Kototabang. Informasi kualitas udara yang dianalisis berdasarkan pantauan alat kualitas udara BAM 1020 untuk monitoring parameter aerosol partikulat debu halus (PM2.5) dan debu (PM10) dan Thermo 49iQ Series untuk monitoring parameter gas reaktif ozon permukaan (O3).'
+      const description = `Pengukuran dilakukan pada tanggal ${dataDate} periode pukul 00 WIB hingga 23 WIB di Stasiun Pemantau Atmosfer Global (GAW) (GAW) Bukit Kototabang. Informasi kualitas udara yang dianalisis berdasarkan pantauan alat kualitas udara BAM 1020 untuk monitoring parameter aerosol partikulat debu halus (PM2.5) dan debu (PM10) dan Thermo 49iQ Series untuk monitoring parameter gas reaktif ozon permukaan (O3).`
       drawWrappedText(
         ctx,
         description,
@@ -137,20 +148,8 @@ export function useCanvasReport() {
         CANVAS_STYLES.positions.conclusion.lineHeight
       )
 
-      const explanation = `Rata-rata Konsentrasi  PM2.5  sebesar ${summarizeData.value?.pm25.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${summarizeData.value?.pm25.max}  µg/m3  terjadi pada pukul ${extractHour(summarizeData.value.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${summarizeData.value?.pm25.min} µg/m3 terjadi pada pukul ${extractHour(summarizeData.value?.pm25.hourMin)}.`
-
-      drawWrappedText(
-        ctx,
-        explanation,
-        CANVAS_STYLES.positions.explanation.x,
-        CANVAS_STYLES.positions.explanation.y,
-        CANVAS_STYLES.positions.explanation.maxWidth,
-        CANVAS_STYLES.positions.explanation.lineHeight
-      )
-
       // Draw signature
       ctx.font = CANVAS_STYLES.fonts.bold18
-      dayjs.locale('id')
       const formattedDate = dayjs().format('DD MMMM YYYY HH.mm [WIB]')
       ctx.fillText(
         formattedDate,
@@ -171,7 +170,7 @@ export function useCanvasReport() {
 
         ctx.save()
         // avg pm2.5
-        ctx.fillStyle = getColorPM25(16)
+        ctx.fillStyle = getColorPM25(summarizeData.value.pm25.avg)
         ctx.fillRect(200, 665, 102, 112)
         // avg pm10
         ctx.fillStyle = getColorPM10(summarizeData.value.pm10.avg)
@@ -193,6 +192,7 @@ export function useCanvasReport() {
 
         // Value
         ctx.fillStyle = '#fff'
+        ctx.font = CANVAS_STYLES.fonts.bold26
         const data = summarizeData.value
         ctx.fillText(Math.round(data.pm25.avg).toString(), 250, 730)
         ctx.fillText(Math.round(data.pm10.avg).toString(), 740, 730)
@@ -222,6 +222,20 @@ export function useCanvasReport() {
         ctx.fillText(extractHour(data.pm25.hourMin), 475, 765)
         ctx.fillText(extractHour(data.pm10.hourMin), 960, 765)
         ctx.fillText(extractHour(data.o3.hourMin), 1445, 765)
+
+        ctx.font = CANVAS_STYLES.fonts.normal
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'top'
+        const explanation = `Rata-rata Konsentrasi  PM2.5  sebesar ${Math.round(data.pm25.avg)}  µg/m3. \\nKonsentrasi tertinggi sebesar ${Math.round(data.pm25.max)}  µg/m3  terjadi pada pukul ${extractHour(data.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${Math.round(data.pm25.min)} µg/m3 terjadi pada pukul ${extractHour(data.pm25.hourMin)}. \\n\\n Rata-rata Konsentrasi  PM10  sebesar ${Math.round(data.pm10.avg)}  µg/m3. \\nKonsentrasi tertinggi sebesar ${Math.round(data.pm10.max)}  µg/m3  terjadi pada pukul ${extractHour(data.pm10.hourMax)} \\ndan konsentrasi  terendah sebesar ${Math.round(data.pm10.min)} µg/m3 terjadi pada pukul ${extractHour(data.pm10.hourMin)}.\\n\\n Rata-rata Konsentrasi  O3  sebesar ${Math.round(data.o3.avg)}  ppb. \\nKonsentrasi tertinggi sebesar ${Math.round(data.o3.max)}  ppb  terjadi pada pukul ${extractHour(data.o3.hourMax)} \\ndan konsentrasi  terendah sebesar ${Math.round(data.o3.min)} ppb terjadi pada pukul ${extractHour(data.o3.hourMin)}.`
+
+        drawWrappedText(
+          ctx,
+          explanation,
+          CANVAS_STYLES.positions.explanation.x,
+          CANVAS_STYLES.positions.explanation.y,
+          CANVAS_STYLES.positions.explanation.maxWidth,
+          CANVAS_STYLES.positions.explanation.lineHeight
+        )
       }
     }
   }
