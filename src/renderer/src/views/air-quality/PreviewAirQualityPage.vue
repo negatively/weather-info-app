@@ -12,7 +12,7 @@ import router from '@renderer/router';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const airQualityStore = useAirQualityStore();
-const { summarize, processed, date } = storeToRefs(airQualityStore);
+const { summarize, dataCleansing, date } = storeToRefs(airQualityStore);
 const nameInput = ref('');
 
 
@@ -24,7 +24,7 @@ const modalMessage = ref('')
 const { canvasRef, initCanvas, downloadReport, saveReport } = useCanvasReport();
 
 // Initialize chart composable
-const { chartData } = useAirQualityChart(processed.value);
+const { chartData } = useAirQualityChart(dataCleansing.value);
 
 // Watch for changes
 watch([nameInput, summarize, date], () => {

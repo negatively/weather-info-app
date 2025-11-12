@@ -5,7 +5,7 @@ export const useAirQualityStore = defineStore('airQuality', () => {
   const processed = ref<any>(null)
   const summarize = ref<any>(null)
   const date = ref<any>(null)
-  const avgByHour = ref<any>(null)
+  const dataCleansing = ref<any>(null)
 
   const setSummarize = (data: any) => {
     summarize.value = data
@@ -19,8 +19,8 @@ export const useAirQualityStore = defineStore('airQuality', () => {
     date.value = data
   }
 
-  const setAvgByHour = (data: any) => {
-    avgByHour.value = data
+  const setDataCleansing = (data: any) => {
+    dataCleansing.value = data
   }
 
   return {
@@ -30,7 +30,7 @@ export const useAirQualityStore = defineStore('airQuality', () => {
     setProcessed,
     date,
     setDate,
-    avgByHour,
-    setAvgByHour
+    dataCleansing,
+    setDataCleansing
   }
 })

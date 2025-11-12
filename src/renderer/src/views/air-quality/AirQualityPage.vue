@@ -32,7 +32,6 @@ const handleGenerate = async () => {
         showModal.value = true
         return
     }
-    airQualityStore.setSummarize(null)
     const avg = await avgByHour(result.data)
     const cleansing = await dataCleansing(avg)
     const summarize = await summarizeDaily(cleansing)
@@ -40,7 +39,7 @@ const handleGenerate = async () => {
     airQualityStore.setProcessed(cleansing)
     airQualityStore.setSummarize(summarize)
     airQualityStore.setDate(date.value)
-    airQualityStore.setAvgByHour(avg)
+    airQualityStore.setDataCleansing(cleansing)
 
 
 
