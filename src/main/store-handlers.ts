@@ -48,7 +48,7 @@ export const initializeStoreHandlers = (
     // Sort newest first, then take only the top 2
     const newestReports = reports
       .sort((a, b) => new Date(b.id).getTime() - new Date(a.id).getTime())
-      .slice(0, 2)
+      .slice(0, 8)
 
     return newestReports
   })
@@ -113,7 +113,7 @@ export const initializeStoreHandlers = (
     }
   })
 
-  ipcMain.handle('copy-image-and-caption', async (_event, { imageBase64, title }) => {
+  ipcMain.handle('copy-image', async (_event, { imageBase64 }) => {
     try {
       const image = nativeImage.createFromDataURL(imageBase64)
 
@@ -122,15 +122,13 @@ export const initializeStoreHandlers = (
 
       // Copy both image and text
       clipboard.write({
-        image,
-        text: title,
-        bookmark: 'Report Image' // optional metadata
+        image
       })
 
-      console.log('[Clipboard] Image and caption copied successfully.')
+      console.log('[Clipboard] Image successfully.')
       return { success: true }
     } catch (error) {
-      console.error('[Clipboard] Error copying image and caption:', error)
+      console.error('[Clipboard] Error copying image :', error)
       return { success: false, error: String(error) }
     }
   })

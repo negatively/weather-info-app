@@ -40,8 +40,8 @@ const saveButton = () => {
         modalMessage.value = "Mohon Isi Nama Analis Terlebih Dahulu"
         showModal.value = true
     } else {
-        saveReport(nameInput.value)
-        router.push({ name: 'air-quality' })
+        saveReport(nameInput.value, airQualityStore.date)
+        // router.push({ name: 'air-quality' })
     }
 }
 

@@ -5,12 +5,13 @@ import icon from '../../resources/icon.png?asset'
 import ElectronStore from 'electron-store'
 import { initializeStoreHandlers } from './store-handlers'
 import { initializeDatabaseHandlers } from './database-handlers'
+import cron from 'node-cron'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1000,
+    height: 700,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -36,6 +37,10 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  cron.schedule('11 14 * * *', () => {
+    console.log('Good morning! Scheduled task at 9 AM')
+  })
 }
 
 // This method will be called when Electron has finished

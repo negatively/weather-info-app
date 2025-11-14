@@ -16,7 +16,6 @@ const saveChanges = async () => {
     const summarize = await summarizeDaily(reversed)
     airQualityStore.setDataCleansing(reversed)
     airQualityStore.setSummarize(summarize)
-    console.log('Saved data:', reversed)
     router.push({ name: 'air-quality.preview' })
 }
 

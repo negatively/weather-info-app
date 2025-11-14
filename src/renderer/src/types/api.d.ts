@@ -32,5 +32,5 @@ export interface ReportAPI {
     error?: string
   }>
   getReportImage: (filePath: string) => Promise<string | null>
-  copyImageAndCaption: (data) => Promise<{ success: boolean }>
+  copyImage: (data) => Promise<{ success: boolean }>
 }

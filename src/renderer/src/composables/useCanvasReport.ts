@@ -102,7 +102,7 @@ export function useCanvasReport() {
     if (!ctx) return
 
     dayjs.locale('id')
-    const dataDate = dayjs(date.value).subtract(1, 'D').format('DD MMMM YYYY')
+    const dataDate = dayjs(date.value).format('DD MMMM YYYY')
 
     ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
 
@@ -128,7 +128,7 @@ export function useCanvasReport() {
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
 
-      const description = `Pengukuran dilakukan pada tanggal ${dataDate} periode pukul 00 WIB hingga 23 WIB di Stasiun Pemantau Atmosfer Global (GAW) (GAW) Bukit Kototabang. Informasi kualitas udara yang dianalisis berdasarkan pantauan alat kualitas udara BAM 1020 untuk monitoring parameter aerosol partikulat debu halus (PM2.5) dan debu (PM10) dan Thermo 49iQ Series untuk monitoring parameter gas reaktif ozon permukaan (O3).`
+      const description = `Pengukuran dilakukan pada tanggal ${dataDate} periode pukul 00 WIB hingga 23 WIB di Stasiun Pemantau Atmosfer Global (GAW) Bukit Kototabang. Informasi kualitas udara yang dianalisis berdasarkan pantauan alat kualitas udara BAM 1020 untuk monitoring parameter aerosol partikulat debu halus (PM2.5) dan debu (PM10) dan Thermo 49iQ Series untuk monitoring parameter gas reaktif ozon permukaan (O3).`
       drawWrappedText(
         ctx,
         description,
@@ -248,22 +248,26 @@ export function useCanvasReport() {
     link.click()
   }
 
-  const saveReport = async (analystName: string) => {
+  const saveReport = async (analystName: string, dataDate: any) => {
     if (!canvasRef.value) {
       console.error('Canvas not found')
       return
     }
 
     const base64Image = canvasRef.value.toDataURL('image/png')
-
     dayjs.locale('id')
     const date = dayjs()
     const formattedDate = date.format('DD MMMM YYYY HH.mm [WIB]')
+
+    const formattedDataDate = dayjs(dataDate).format('DD MMMM YYYY')
+    console.log(formattedDataDate)
     const report: SavedReport = {
       id: date.toISOString(),
       imagePath: '',
       createdAt: formattedDate,
-      analystName: analystName
+      analystName: analystName,
+      dataDate: formattedDataDate,
+      imageBase64: ''
     }
 
     const result = window.api.saveReport(report, base64Image)

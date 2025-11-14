@@ -10,4 +10,6 @@ export interface SavedReport {
   imagePath: string
   createdAt: string
   analystName: string
+  dataDate: string
+  imageBase64: any
 }

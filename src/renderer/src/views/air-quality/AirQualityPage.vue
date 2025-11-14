@@ -16,6 +16,8 @@ const listReport = ref<SavedReport[]>([])
 const showModal = ref(false)
 const modalMessage = ref('')
 
+const caption = "Dengan hormat, berikut kami sampaikan informasi kualitas udara tanggal"
+
 
 const handleGenerate = async () => {
     const prev = new Date(date.value)
@@ -38,7 +40,7 @@ const handleGenerate = async () => {
 
     airQualityStore.setProcessed(cleansing)
     airQualityStore.setSummarize(summarize)
-    airQualityStore.setDate(date.value)
+    airQualityStore.setDate(prevDate)
     airQualityStore.setDataCleansing(cleansing)
 
 
@@ -95,7 +97,8 @@ const showPicker = (event) => {
             <h1 class="text-base font-semibold text-white">Result</h1>
         </div>
         <div class="flex flex-wrap gap-3">
-            <ImageResultCard v-for="report in listReport" :image="report.imageBase64" :title="report.createdAt" />
+            <ImageResultCard v-for="report in listReport" :image="report.imageBase64" :title="report.createdAt"
+                :caption="caption + ' ' + report.dataDate + '.'" />
         </div>
     </div>
 
