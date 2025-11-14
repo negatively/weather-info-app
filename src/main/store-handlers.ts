@@ -1,7 +1,6 @@
 import { clipboard, IpcMain, nativeImage, shell } from 'electron'
 import ElectronStore from 'electron-store'
 import { saveReportImage, deleteReportImage } from './report-handlers'
-import fs from 'fs'
 import { DatabaseConfig, SavedReport } from '../shared/types/store'
 
 /**
@@ -100,36 +99,5 @@ export const initializeStoreHandlers = (
     }
 
     return { success: false, error: 'Report not found' }
-  })
-
-  // IPC Handler: Get Report Image
-  ipcMain.handle('get-report-image', (_event, filePath: string) => {
-    try {
-      const imageBuffer = fs.readFileSync(filePath)
-      return `data:image/png;base64,${imageBuffer.toString('base64')}`
-    } catch (error) {
-      console.error('[Store Handler] Error reading report image:', error)
-      return null
-    }
-  })
-
-  ipcMain.handle('copy-image', async (_event, { imageBase64 }) => {
-    try {
-      const image = nativeImage.createFromDataURL(imageBase64)
-
-      // Clear first (good hygiene)
-      clipboard.clear()
-
-      // Copy both image and text
-      clipboard.write({
-        image
-      })
-
-      console.log('[Clipboard] Image successfully.')
-      return { success: true }
-    } catch (error) {
-      console.error('[Clipboard] Error copying image :', error)
-      return { success: false, error: String(error) }
-    }
   })
 }

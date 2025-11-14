@@ -6,6 +6,7 @@ import ElectronStore from 'electron-store'
 import { initializeStoreHandlers } from './store-handlers'
 import { initializeDatabaseHandlers } from './database-handlers'
 import cron from 'node-cron'
+import { initializeActionHandlers } from './action-handler'
 
 function createWindow(): void {
   // Create the browser window.
@@ -83,3 +84,4 @@ app.on('window-all-closed', () => {
 const Store = (ElectronStore as any).default || ElectronStore
 initializeStoreHandlers(ipcMain, Store)
 initializeDatabaseHandlers(ipcMain, Store)
+initializeActionHandlers(ipcMain)

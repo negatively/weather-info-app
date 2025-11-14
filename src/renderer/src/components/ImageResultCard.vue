@@ -22,19 +22,19 @@ const copyImage = async (image: string) => {
     }
 };
 
-// const copyCaption = async (image: string) => {
-//     try {
-//         const res = await window.api.copyCaption({ imageBase64: image });
-//         if (res.success) {
-//             alert('✅ Image sudah tercopy');
-//         } else {
-//             alert('❌ Failed to copy: ' + res.error);
-//         }
-//     } catch (err) {
-//         console.error(err);
-//         alert('❌ Something went wrong.');
-//     }
-// }
+const copyCaption = async (caption: string) => {
+    try {
+        const res = await window.api.copyCaption({ caption: caption });
+        if (res.success) {
+            alert('✅ Caption sudah tercopy');
+        } else {
+            alert('❌ Failed to copy: ' + res.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('❌ Something went wrong.');
+    }
+}
 
 
 </script>
@@ -54,7 +54,8 @@ const copyImage = async (image: string) => {
                 Copy Image
             </button>
             <button
-                class="text-white bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
+                class="text-white bg-emerald-700 hover:bg-emerald-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+                @click="copyCaption(caption)">
                 Copy Caption
             </button>
         </div>
