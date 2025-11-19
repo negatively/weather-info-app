@@ -53,6 +53,8 @@ const rejectButton = () => {
     router.push({ name: 'air-quality' })
 }
 
+console.log(summarize.value)
+
 </script>
 
 <template>

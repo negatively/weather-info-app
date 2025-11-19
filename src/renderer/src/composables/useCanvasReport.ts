@@ -88,8 +88,12 @@ export function useCanvasReport() {
   }
 
   const extractHour = (dateTimeString: string | null) => {
-    if (!dateTimeString) return ''
-    return new Date(dateTimeString).getHours().toString().padStart(2, '0')
+    if (!dateTimeString || dateTimeString === 'X') return 'X'
+
+    const date = new Date(dateTimeString)
+    if (isNaN(date.getTime())) return 'X' // invalid date handling
+
+    return date.getHours().toString().padStart(2, '0')
   }
 
   const initCanvas = (
@@ -194,31 +198,31 @@ export function useCanvasReport() {
         ctx.font = CANVAS_STYLES.fonts.bold26
         const data = summarizeData.value
         ctx.fillStyle = getColorTextPM25(data.pm25.avg)
-        ctx.fillText(Math.ceil(data.pm25.avg).toString(), 250, 730)
+        ctx.fillText(data.pm25.avg.toString(), 250, 730)
         ctx.fillStyle = getColorTextPM10(data.pm10.avg)
-        ctx.fillText(Math.ceil(data.pm10.avg).toString(), 740, 730)
+        ctx.fillText(data.pm10.avg.toString(), 740, 730)
         ctx.fillStyle = getColorTextPM25(data.pm25.max)
-        ctx.fillText(Math.ceil(data.pm25.max).toString(), 360, 695)
+        ctx.fillText(data.pm25.max.toString(), 360, 695)
         ctx.fillStyle = getColorTextPM10(data.pm10.max)
-        ctx.fillText(Math.ceil(data.pm10.max).toString(), 850, 695)
+        ctx.fillText(data.pm10.max.toString(), 850, 695)
         ctx.fillStyle = getColorTextPM25(data.pm25.min)
-        ctx.fillText(Math.ceil(data.pm25.min).toString(), 475, 695)
+        ctx.fillText(data.pm25.min.toString(), 475, 695)
         ctx.fillStyle = getColorTextPM10(data.pm10.min)
-        ctx.fillText(Math.ceil(data.pm10.min).toString(), 960, 695)
+        ctx.fillText(data.pm10.min.toString(), 960, 695)
         ctx.fillStyle = '#fff'
 
         ctx.restore()
 
         // Draw averages
 
-        ctx.fillText(Math.ceil(data.o3.avg).toString(), 1225, 730)
+        ctx.fillText(data.o3.avg.toString(), 1225, 730)
 
         ctx.font = CANVAS_STYLES.fonts.bold26
         // Draw max/min values
 
-        ctx.fillText(Math.ceil(data.o3.max).toString(), 1335, 695)
+        ctx.fillText(data.o3.max.toString(), 1335, 695)
 
-        ctx.fillText(Math.ceil(data.o3.min).toString(), 1445, 695)
+        ctx.fillText(data.o3.min.toString(), 1445, 695)
 
         // Draw hours
         ctx.fillText(extractHour(data.pm25.hourMax), 360, 765)
@@ -232,7 +236,7 @@ export function useCanvasReport() {
         ctx.font = CANVAS_STYLES.fonts.normal
         ctx.textAlign = 'left'
         ctx.textBaseline = 'top'
-        const explanation = `Rata-rata Konsentrasi  PM2.5  sebesar ${Math.ceil(data.pm25.avg)}  µg/m3. \\nKonsentrasi tertinggi sebesar ${Math.ceil(data.pm25.max)}  µg/m3  terjadi pada pukul ${extractHour(data.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${Math.ceil(data.pm25.min)} µg/m3 terjadi pada pukul ${extractHour(data.pm25.hourMin)}. \\n\\n Rata-rata Konsentrasi  PM10  sebesar ${Math.ceil(data.pm10.avg)}  µg/m3. \\nKonsentrasi tertinggi sebesar ${Math.ceil(data.pm10.max)}  µg/m3  terjadi pada pukul ${extractHour(data.pm10.hourMax)} \\ndan konsentrasi  terendah sebesar ${Math.ceil(data.pm10.min)} µg/m3 terjadi pada pukul ${extractHour(data.pm10.hourMin)}.\\n\\n Rata-rata Konsentrasi  O3  sebesar ${Math.ceil(data.o3.avg)}  ppb. \\nKonsentrasi tertinggi sebesar ${Math.ceil(data.o3.max)}  ppb  terjadi pada pukul ${extractHour(data.o3.hourMax)} \\ndan konsentrasi  terendah sebesar ${Math.ceil(data.o3.min)} ppb terjadi pada pukul ${extractHour(data.o3.hourMin)}.`
+        const explanation = `Rata-rata Konsentrasi  PM2.5  sebesar ${data.pm25.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${data.pm25.max}  µg/m3  terjadi pada pukul ${extractHour(data.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.pm25.min} µg/m3 terjadi pada pukul ${extractHour(data.pm25.hourMin)}. \\n\\n Rata-rata Konsentrasi  PM10  sebesar ${data.pm10.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${data.pm10.max}  µg/m3  terjadi pada pukul ${extractHour(data.pm10.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.pm10.min} µg/m3 terjadi pada pukul ${extractHour(data.pm10.hourMin)}.\\n\\n Rata-rata Konsentrasi  O3  sebesar ${data.o3.avg}  ppb. \\nKonsentrasi tertinggi sebesar ${data.o3.max}  ppb  terjadi pada pukul ${extractHour(data.o3.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.o3.min} ppb terjadi pada pukul ${extractHour(data.o3.hourMin)}.`
 
         drawWrappedText(
           ctx,
@@ -283,26 +287,26 @@ export function useCanvasReport() {
     if (value >= 0 && value <= 15.5) return 'rgb(0,204,0)' // hijau
     if (value >= 15.6 && value <= 55.4) return 'rgb(0,51,255)' // biru
     if (value >= 55.5 && value <= 150.4) return 'rgb(255,255,0)' // kuning
-    return 'gray'
+    return 'rgb(0,204,0)'
   }
 
   const getColorPM10 = (value) => {
     if (value >= 0 && value <= 50) return 'rgb(0,204,0)' // hijau
     if (value >= 51 && value <= 150) return 'rgb(0,51,255)' // biru
     if (value >= 151 && value <= 350) return 'rgb(255,255,0)' // kuning
-    return 'gray'
+    return 'rgb(0,204,0)'
   }
 
   const getColorTextPM25 = (value) => {
     if (value >= 0 && value <= 55.4) return 'rgb(255,255,255)'
     if (value >= 55.5 && value <= 150.4) return 'rgb(0,0,0)'
-    return 'gray'
+    return 'rgb(255,255,255)'
   }
 
   const getColorTextPM10 = (value) => {
     if (value >= 0 && value <= 150) return 'rgb(255,255,255)'
     if (value >= 151 && value <= 350) return 'rgb(0,0,0)'
-    return 'gray'
+    return 'rgb(255,255,255)'
   }
 
   return {

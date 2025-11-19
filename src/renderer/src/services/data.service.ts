@@ -55,85 +55,71 @@ export async function avgByHour(rows: RawAirQuality) {
 }
 
 export async function summarizeDaily(data: HourlySummarize) {
-  // pm10
-  const avgPm10 = _.meanBy(data.pm10, 'avg')
-  const minDataPm10 = _.minBy(data.pm10, 'avg')
-  const maxDataPm10 = _.maxBy(data.pm10, 'avg')
+  const summarizePollutant = (arr: any[]) => {
+    const nonNull = arr.filter((item) => item.avg !== null)
+    const count = nonNull.length
 
-  const sumPm10 = {
-    avg: avgPm10,
-    min: minDataPm10?.avg ?? 0,
-    max: maxDataPm10?.avg ?? 0,
-    hourMin: minDataPm10?.hour ?? null,
-    hourMax: maxDataPm10?.hour ?? null
+    // If less than 12 valid data points → everything is "X"
+    if (count < 12) {
+      return {
+        avg: 'X',
+        min: 'X',
+        max: 'X',
+        hourMin: 'X',
+        hourMax: 'X'
+      }
+    }
+
+    // Compute raw values
+    const rawMean = _.meanBy(nonNull, 'avg')
+    const minData = _.minBy(nonNull, 'avg')
+    const maxData = _.maxBy(nonNull, 'avg')
+
+    // Apply Math.ceil ONLY when count > 12
+    const applyCeil = (val: number) => (count > 12 ? Math.ceil(val) : val)
+
+    return {
+      avg: applyCeil(rawMean),
+      min: applyCeil(minData?.avg ?? 0),
+      max: applyCeil(maxData?.avg ?? 0),
+      hourMin: minData?.hour ?? 'X',
+      hourMax: maxData?.hour ?? 'X'
+    }
   }
 
-  // pm25
-  const avgPm25 = _.meanBy(data.pm25, 'avg')
-  const minDataPm25 = _.minBy(data.pm25, 'avg')
-  const maxDataPm25 = _.maxBy(data.pm25, 'avg')
+  const sumPm10 = summarizePollutant(data.pm10)
+  const sumPm25 = summarizePollutant(data.pm25)
+  const sumO3 = summarizePollutant(data.o3)
 
-  const sumPm25 = {
-    avg: avgPm25,
-    min: minDataPm25?.avg ?? 0,
-    max: maxDataPm25?.avg ?? 0,
-    hourMin: minDataPm25?.hour ?? null,
-    hourMax: maxDataPm25?.hour ?? null
-  }
-
-  // pm10
-  const avgO3 = _.meanBy(data.o3, 'avg')
-  const minDataO3 = _.minBy(data.o3, 'avg')
-  const maxDataO3 = _.maxBy(data.o3, 'avg')
-
-  const sumO3 = {
-    avg: avgO3,
-    min: minDataO3?.avg ?? 0,
-    max: maxDataO3?.avg ?? 0,
-    hourMin: minDataO3?.hour ?? null,
-    hourMax: maxDataO3?.hour ?? null
-  }
   const response: StatSummarize = { o3: sumO3, pm10: sumPm10, pm25: sumPm25 }
+  console.error(response)
+
   return response
 }
 
 export async function dataCleansing(data: HourlySummarize) {
   // pm25
   // remove 0 and 9999
-  const absPm25 = data.pm25.map((n: HourlyData) => ({
-    ...n,
-    avg: Math.abs(n.avg)
-  }))
-
-  const delValPm25 = _.map(absPm25, (n: HourlyData) => {
-    return n.avg != 0 && n.avg < 9999 ? n : { ...n, avg: null }
+  const delValPm25 = _.map(data.pm25, (n: HourlyData) => {
+    return n.avg > 0 && n.avg < 9999 ? n : { ...n, avg: null }
   })
 
   // pm10
   // remove 0 and 9999
   const absPm10 = data.pm10.map((n: HourlyData) => {
-    const absAvg = Math.abs(n.avg)
-    console.log(absAvg)
-    const nAvg = absAvg < 1 ? absAvg * 1000 : absAvg
-    console.warn(nAvg)
+    const nAvg = n.avg < 1 ? n.avg * 1000 : n.avg
     return {
       ...n,
       avg: nAvg
     }
   })
   const delValPm10 = _.map(absPm10, (n: HourlyData) => {
-    return n.avg != 0 && n.avg < 9999 ? n : { ...n, avg: null }
+    return n.avg > 0 && n.avg < 9999 ? n : { ...n, avg: null }
   })
-  console.log(delValPm10)
   // o3
   // remove 0 and 9999
-  const absO3 = data.o3.map((n: HourlyData) => ({
-    ...n,
-    avg: Math.abs(n.avg)
-  }))
-
-  const delValO3 = _.map(absO3, (n: HourlyData) => {
-    return n.avg != 0 && n.avg < 9999 ? n : { ...n, avg: null }
+  const delValO3 = _.map(data.o3, (n: HourlyData) => {
+    return n.avg > 0 && n.avg < 9999 ? n : { ...n, avg: null }
   })
 
   const response: HourlySummarize = {
