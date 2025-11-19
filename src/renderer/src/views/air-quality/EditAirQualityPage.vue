@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { useAirQualityStore } from '@renderer/stores/airQuality';
 import { HourlySummarize } from '@renderer/types/data-process';
-import { summarizeDaily } from '@renderer/services/data.service';
+import { dataCleansing, summarizeDaily } from '@renderer/services/data.service';
 import router from '@renderer/router';
 
 
@@ -13,8 +13,9 @@ const tableData = ref<Array<any>>([])
 const saveChanges = async () => {
     console.warn('Saving edited data...')
     const reversed = reverseTransformData(tableData.value)
-    const summarize = await summarizeDaily(reversed)
-    airQualityStore.setDataCleansing(reversed)
+    const cleansing = await dataCleansing(reversed)
+    const summarize = await summarizeDaily(cleansing)
+    airQualityStore.setDataCleansing(cleansing)
     airQualityStore.setSummarize(summarize)
     router.push({ name: 'air-quality.preview' })
 }

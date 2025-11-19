@@ -22,6 +22,7 @@ export function useAirQualityChart(processedData: ProcessedData | null) {
     if (!processedData?.o3) return { labels: [], datasets: [] }
 
     const labels = processedData.o3.map((item) => item.hour.slice(11))
+    console.warn(processedData.pm10.map((item) => item.avg))
 
     return {
       labels,

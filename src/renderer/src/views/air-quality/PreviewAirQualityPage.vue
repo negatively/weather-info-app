@@ -41,7 +41,7 @@ const saveButton = () => {
         showModal.value = true
     } else {
         saveReport(nameInput.value, airQualityStore.date)
-        // router.push({ name: 'air-quality' })
+        router.push({ name: 'air-quality' })
     }
 }
 

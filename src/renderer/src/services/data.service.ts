@@ -17,9 +17,9 @@ export async function avgByHour(rows: RawAirQuality) {
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:00`
   })
   // Hitung rata-rata per grup
-  const avgO3: HourlyData[] = Object.entries(groupedO3).map(([hour, values]) => {
+  const avgO3: HourlyData[] = Object.entries(groupedO3).map(([hour, values]: [string, any]) => {
     const avg = _.meanBy(values, 'O3')
-    return { hour, avg, count: values.length }
+    return { hour, avg, count: values?.length }
   })
 
   // processing pm25
@@ -29,9 +29,9 @@ export async function avgByHour(rows: RawAirQuality) {
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:00`
   })
   // Hitung rata-rata per grup
-  const avgPm25: HourlyData[] = Object.entries(groupedPm25).map(([hour, values]) => {
+  const avgPm25: HourlyData[] = Object.entries(groupedPm25).map(([hour, values]: [string, any]) => {
     const avg = _.meanBy(values, 'PM25')
-    return { hour, avg, count: values.length }
+    return { hour, avg, count: values?.length }
   })
 
   // processing pm10
@@ -41,9 +41,9 @@ export async function avgByHour(rows: RawAirQuality) {
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:00`
   })
   // Hitung rata-rata per grup
-  const avgPm10: HourlyData[] = Object.entries(groupedPm10).map(([hour, values]) => {
+  const avgPm10: HourlyData[] = Object.entries(groupedPm10).map(([hour, values]: [string, any]) => {
     const avg = _.meanBy(values, 'PM10')
-    return { hour, avg, count: values.length }
+    return { hour, avg, count: values?.length }
   })
 
   const response: HourlySummarize = {
@@ -100,41 +100,46 @@ export async function summarizeDaily(data: HourlySummarize) {
 export async function dataCleansing(data: HourlySummarize) {
   // pm25
   // remove 0 and 9999
-  const delValPm25 = _.filter(data.pm25, (n: HourlyData) => {
-    return n.avg != 0 || n.avg < 9999
-  })
-
-  const absPm25 = delValPm25.map((n: HourlyData) => ({
+  const absPm25 = data.pm25.map((n: HourlyData) => ({
     ...n,
     avg: Math.abs(n.avg)
   }))
+
+  const delValPm25 = _.map(absPm25, (n: HourlyData) => {
+    return n.avg != 0 && n.avg < 9999 ? n : { ...n, avg: null }
+  })
 
   // pm10
   // remove 0 and 9999
-  const delValPm10 = _.remove(data.pm10, (n: HourlyData) => {
-    return n.avg != 0 || n.avg < 9999
+  const absPm10 = data.pm10.map((n: HourlyData) => {
+    const absAvg = Math.abs(n.avg)
+    console.log(absAvg)
+    const nAvg = absAvg < 1 ? absAvg * 1000 : absAvg
+    console.warn(nAvg)
+    return {
+      ...n,
+      avg: nAvg
+    }
   })
-
-  const absPm10 = delValPm10.map((n: HourlyData) => ({
-    ...n,
-    avg: Math.abs(n.avg) * 1000
-  }))
-
+  const delValPm10 = _.map(absPm10, (n: HourlyData) => {
+    return n.avg != 0 && n.avg < 9999 ? n : { ...n, avg: null }
+  })
+  console.log(delValPm10)
   // o3
   // remove 0 and 9999
-  const delValO3 = _.remove(data.o3, (n: HourlyData) => {
-    return n.avg != 0 || n.avg < 9999
-  })
-
-  const absO3 = delValO3.map((n: HourlyData) => ({
+  const absO3 = data.o3.map((n: HourlyData) => ({
     ...n,
     avg: Math.abs(n.avg)
   }))
 
+  const delValO3 = _.map(absO3, (n: HourlyData) => {
+    return n.avg != 0 && n.avg < 9999 ? n : { ...n, avg: null }
+  })
+
   const response: HourlySummarize = {
-    o3: absO3,
-    pm10: absPm10,
-    pm25: absPm25
+    o3: delValO3,
+    pm10: delValPm10,
+    pm25: delValPm25
   }
   return response
 }

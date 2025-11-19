@@ -17,6 +17,8 @@ declare global {
       saveReport: (report: any, imageData: string) => Promise<{ success: boolean; message: string }>
       getSavedReports: () => Promise<SavedReport[]>
       getReportImage: (path: string) => Promise<string>
+      copyImage: (data) => Promise<{ success: boolean; error: string }>
+      copyCaption: (data) => Promise<{ success: boolean; error: string }>
     }
   }
 }

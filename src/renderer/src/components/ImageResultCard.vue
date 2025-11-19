@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ipcRenderer } from 'electron';
+import { openModal } from '@renderer/stores/modal';
 
 
-defineProps<{
+const props = defineProps<{
     image: string;
     title: string;
     caption: string;
@@ -36,15 +37,25 @@ const copyCaption = async (caption: string) => {
     }
 }
 
+const openPreviewModal = () => {
+    openModal('imagePreview', {
+        imageUrl: props.image,
+        prompt: props.caption,
+        date: props.title
+    })
+}
+
 
 </script>
 
 <template>
     <section class="border border-zinc-600 rounded-2xl p-4 w-64 text-white shadow-lg">
-        <img :src="image" alt="Image" class="rounded-lg mb-3 w-full object-cover">
+        <button class="text-left cursor-pointer" @click="openPreviewModal()">
+            <img :src="image" alt="Image" class="rounded-lg mb-3 w-full object-cover">
 
-        <p class="text-sm mb-4">{{ caption }}</p>
-        <p class="text-sm text-amber-300  mb-4">Dibuat pada : {{ title }}</p>
+            <p class="text-sm mb-4">{{ caption }}</p>
+            <p class="text-sm text-amber-300  mb-4">Dibuat pada : {{ title }}</p>
+        </button>
 
 
         <div class="flex justify-around flex-col">

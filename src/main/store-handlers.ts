@@ -1,4 +1,4 @@
-import { clipboard, IpcMain, nativeImage, shell } from 'electron'
+import { IpcMain } from 'electron'
 import ElectronStore from 'electron-store'
 import { saveReportImage, deleteReportImage } from './report-handlers'
 import { DatabaseConfig, SavedReport } from '../shared/types/store'

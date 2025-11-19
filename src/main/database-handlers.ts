@@ -36,6 +36,7 @@ export const initializeDatabaseHandlers = (
   })
 
   ipcMain.handle('fetch-data-by-date', async (event, targetDate: string) => {
+    console.log(event.type)
     const config = store.get('dbSettings') as DatabaseConfig
     let connection: mysql.Connection | null = null
 
