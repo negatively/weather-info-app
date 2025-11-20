@@ -6,6 +6,8 @@ const api = {
   // Database settings
   getDbSettings: () => ipcRenderer.invoke('get-db-settings'),
   setDbSettings: (settings) => ipcRenderer.invoke('set-db-settings', settings),
+  getSchSettings: () => ipcRenderer.invoke('get-sch-settings'),
+  setSchSettings: (settings) => ipcRenderer.invoke('set-sch-settings', settings),
   testDbConnection: () => ipcRenderer.invoke('test-db-connection'),
   fetchDataByDate: (date) => ipcRenderer.invoke('fetch-data-by-date', date),
 

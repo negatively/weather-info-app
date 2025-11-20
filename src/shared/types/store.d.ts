@@ -13,3 +13,7 @@ export interface SavedReport {
   dataDate: string
   imageBase64: any
 }
+
+export interface ScheduleConfig {
+  air_time: string
+}

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, toRaw } from 'vue'
-import { DatabaseConfig } from '@renderer/types/preload';
+import { DatabaseConfig, ScheduleConfig } from '@renderer/types/preload';
 
 const formData = ref<DatabaseConfig>({
     host: '127.0.0.1',
@@ -9,9 +9,16 @@ const formData = ref<DatabaseConfig>({
     password: 'password'
 })
 
+const formDataSch = ref<ScheduleConfig>({
+    air_time: '',
+})
+
 const loadSettings = async () => {
     const data = await window.api.getDbSettings();
     formData.value = data;
+
+    const dataSch = await window.api.getSchSettings();
+    formDataSch.value = dataSch
 
 }
 
@@ -20,8 +27,19 @@ const saveSettings = async () => {
     try {
         await window.api.setDbSettings(toRaw(formData.value))
         console.log('Settings saved successfully!')
+        alert('✅ Setting sudah tersimpan');
     } catch (error) {
         console.error('Failed to save settings:', error)
+    }
+}
+
+const saveSchSettings = async () => {
+    try {
+        await window.api.setSchSettings(toRaw(formDataSch.value))
+        console.log('Settings schedule saved successfully!')
+        alert('✅ Setting sudah tersimpan');
+    } catch (error) {
+        console.error('Failed to save schedule settings')
     }
 }
 
@@ -34,11 +52,15 @@ const testConnection = async () => {
 onMounted(() => {
     loadSettings()
 })
+
+const showPicker = (event) => {
+    if (event.target.showPicker) event.target.showPicker()
+}
 </script>
 
 <template>
     <div class="database-settings">
-        <h2 class="text-base font-semibold mb-4">Database Configuration</h2>
+        <h2 class="text-base font-semibold mb-4">Pengaturan Database</h2>
         <form @submit.prevent="saveSettings" class="space-y-4 bg-zinc-800 p-4 rounded-lg">
             <div class="form-group">
                 <label for="host" class="block text-xs mb-1">Host</label>
@@ -69,6 +91,22 @@ onMounted(() => {
                     class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                     Test Connection
                 </button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="mt-4">
+        <h2 class="text-base font-semibold mb-4">Pengaturan Jadwal</h2>
+        <form @submit.prevent="saveSchSettings" class="space-y-4 bg-zinc-800 p-4 rounded-lg">
+            <div class="form-group">
+                <label for="host" class="block text-xs mb-1">Jadwal Generate Informasi Kualitas Udara </label>
+                <input type="time" id="host" v-model="formDataSch.air_time"
+                    class="w-full px-3 py-2 border border-zinc-600 rounded-md text-sm" @focus="showPicker" />
+            </div>
+
+            <div class="flex justify-end space-x-2">
                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                     Save Settings
                 </button>

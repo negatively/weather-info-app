@@ -7,6 +7,11 @@ import { initializeStoreHandlers } from './store-handlers'
 import { initializeDatabaseHandlers } from './database-handlers'
 import cron from 'node-cron'
 import { initializeActionHandlers } from './action-handler'
+import { ScheduleConfig } from '../shared/types/store'
+import { loadCronOnStartup } from './cron-handler'
+
+const Store = (ElectronStore as any).default || ElectronStore
+const eStore = new Store()
 
 function createWindow(): void {
   // Create the browser window.
@@ -38,10 +43,6 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-
-  cron.schedule('11 14 * * *', () => {
-    console.log('Good morning! Scheduled task at 9 AM')
-  })
 }
 
 // This method will be called when Electron has finished
@@ -63,6 +64,11 @@ app.whenReady().then(() => {
 
   createWindow()
 
+  // Call Cron
+  const schSettings = eStore.get('schSettings')
+  if (schSettings?.air_time) {
+    loadCronOnStartup(schSettings.air_time)
+  }
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -81,7 +87,6 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-const Store = (ElectronStore as any).default || ElectronStore
 initializeStoreHandlers(ipcMain, Store)
 initializeDatabaseHandlers(ipcMain, Store)
 initializeActionHandlers(ipcMain)

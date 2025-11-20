@@ -7,6 +7,10 @@ export interface DatabaseConfig {
   password: string
 }
 
+export interface ScheduleConfig {
+  air_time: string
+}
+
 declare global {
   interface Window {
     api: {
@@ -19,6 +23,8 @@ declare global {
       getReportImage: (path: string) => Promise<string>
       copyImage: (data) => Promise<{ success: boolean; error: string }>
       copyCaption: (data) => Promise<{ success: boolean; error: string }>
+      getSchSettings: () => Promise<ScheduleConfig>
+      setSchSettings: (settings: ScheduleConfig) => Promise<boolean>
     }
   }
 }

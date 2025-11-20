@@ -1,7 +1,8 @@
 import { IpcMain } from 'electron'
 import ElectronStore from 'electron-store'
 import { saveReportImage, deleteReportImage } from './report-handlers'
-import { DatabaseConfig, SavedReport } from '../shared/types/store'
+import { DatabaseConfig, SavedReport, ScheduleConfig } from '../shared/types/store'
+import { loadCronOnStartup, startCronJob } from './cron-handler'
 
 /**
  * Initializes the ElectronStore instance and sets up the IPC handlers
@@ -21,26 +22,46 @@ export const initializeStoreHandlers = (
   // Define the default settings structure
   const defaultDBSettings: DatabaseConfig = {
     host: '127.0.0.1',
-    database: 'gawdata',
+    database: 'database',
     user: 'root',
     password: ''
   }
 
-  // IPC Handler: Load Settings
+  const defaultSchSettings: ScheduleConfig = {
+    air_time: '08:00'
+  }
+
+  // ======================= Database Settings ===================== //
+
   ipcMain.handle('get-db-settings', () => {
     console.log('[Store Handler] Loading DB settings.')
     // Retrieves settings, falling back to defaults if not found
     return store.get('dbSettings', defaultDBSettings)
   })
 
-  // IPC Handler: Save Settings
   ipcMain.handle('set-db-settings', (_event, settings) => {
     console.log('[Store Handler] Saving new DB settings:', settings)
     store.set('dbSettings', settings)
     return true
   })
 
-  // IPC Handler: Get Saved Reports
+  // ================================================================================== //
+
+  // ============================== Schedule Config =================================== //
+  ipcMain.handle('set-sch-settings', (_event, settings) => {
+    console.log('[Store Handler] Saving new Sch settings:', settings)
+    store.set('schSettings', settings)
+    loadCronOnStartup(settings.air_time)
+    return true
+  })
+
+  ipcMain.handle('get-sch-settings', () => {
+    console.log('[Store Handler] Loading Sch settings.')
+    // Retrieves settings, falling back to defaults if not found
+    return store.get('schSettings', defaultSchSettings)
+  })
+  // ================================================================================== //
+
   ipcMain.handle('get-saved-reports', () => {
     console.log('[Store Handler] Loading saved reports.')
     const reports = ImageStore.get('AirQualityReports', []) as SavedReport[]
@@ -51,7 +72,6 @@ export const initializeStoreHandlers = (
 
     return newestReports
   })
-
   // IPC Handler: Save Report
   ipcMain.handle(
     'save-report',
