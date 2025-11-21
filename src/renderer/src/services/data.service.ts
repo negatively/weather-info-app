@@ -97,7 +97,7 @@ export async function summarizeDaily(data: HourlySummarize) {
   return response
 }
 
-export async function dataCleansing(data: HourlySummarize) {
+export async function dataCleansing(data: HourlySummarize, rescaling: boolean) {
   // pm25
   // remove 0 and 9999
   const delValPm25 = _.map(data.pm25, (n: HourlyData) => {
@@ -107,7 +107,7 @@ export async function dataCleansing(data: HourlySummarize) {
   // pm10
   // remove 0 and 9999
   const absPm10 = data.pm10.map((n: HourlyData) => {
-    const nAvg = n.avg < 1 ? n.avg * 1000 : n.avg
+    const nAvg = rescaling ? n.avg * 1000 : n.avg
     return {
       ...n,
       avg: nAvg

@@ -4,19 +4,22 @@ import { useAirQualityStore } from '@renderer/stores/airQuality';
 import { HourlySummarize } from '@renderer/types/data-process';
 import { dataCleansing, summarizeDaily } from '@renderer/services/data.service';
 import router from '@renderer/router';
+import LoadingOverlay from '@renderer/components/LoadingOverlay.vue';
 
-
+const isLoading = ref(false)
 const airQualityStore = useAirQualityStore()
 const tableData = ref<Array<any>>([])
 
-
 const saveChanges = async () => {
+    isLoading.value = true
     console.warn('Saving edited data...')
+    await new Promise(res => setTimeout(res, 1000))
     const reversed = reverseTransformData(tableData.value)
-    const cleansing = await dataCleansing(reversed)
+    const cleansing = await dataCleansing(reversed, false)
     const summarize = await summarizeDaily(cleansing)
     airQualityStore.setDataCleansing(cleansing)
     airQualityStore.setSummarize(summarize)
+    isLoading.value = false
     router.push({ name: 'air-quality.preview' })
 }
 
@@ -75,4 +78,5 @@ watch(
             </vxe-table>
         </div>
     </div>
+    <LoadingOverlay :show="isLoading" />
 </template>

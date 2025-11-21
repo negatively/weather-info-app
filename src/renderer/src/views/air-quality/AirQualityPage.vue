@@ -7,6 +7,7 @@ import ImagePreviewModal from '@renderer/components/ImagePreviewModal.vue';
 import router from '@renderer/router';
 import { useAirQualityStore } from '@renderer/stores/airQuality';
 import { SavedReport } from 'src/shared/types/store';
+import LoadingOverlay from '@renderer/components/LoadingOverlay.vue';
 
 const airQualityStore = useAirQualityStore();
 const currentDate = new Date().toISOString().slice(0, 10);
@@ -17,25 +18,29 @@ const showModal = ref(false)
 const modalMessage = ref('')
 
 const caption = "Dengan hormat, berikut kami sampaikan informasi kualitas udara tanggal"
-
+const isLoading = ref(false)
 
 const handleGenerate = async () => {
+    isLoading.value = true
+    await new Promise(res => setTimeout(res, 1000))
     const prev = new Date(date.value)
     prev.setDate(prev.getDate() - 1)
     const prevDate = prev.toISOString().slice(0, 10)
     const result = await fetchRawData(prevDate)
 
     if (!result.success) {
+        isLoading.value = false
         modalMessage.value = "Server tidak terkoneksi dengan baik"
         showModal.value = true
         return
     } else if (result.data.o3.length == 0 && result.data.pm25.length == 0 && result.data.pm10.length == 0) {
+        isLoading.value = false
         modalMessage.value = "Data Tidak Ditemukan"
         showModal.value = true
         return
     }
     const avg = await avgByHour(result.data)
-    const cleansing = await dataCleansing(avg)
+    const cleansing = await dataCleansing(avg, true)
     const summarize = await summarizeDaily(cleansing)
 
     airQualityStore.setProcessed(cleansing)
@@ -43,8 +48,7 @@ const handleGenerate = async () => {
     airQualityStore.setDate(prevDate)
     airQualityStore.setDataCleansing(cleansing)
 
-
-
+    isLoading.value = false
     router.push({ name: 'air-quality.preview' })
 
 }
@@ -104,4 +108,7 @@ const showPicker = (event) => {
 
     <AlertModal v-model:show="showModal" title="Error" :message="modalMessage"></AlertModal>
     <ImagePreviewModal />
+
+    <!-- Loading State -->
+    <LoadingOverlay :show="isLoading" />
 </template>
