@@ -1,3 +1,4 @@
+import { BrowserWindow } from 'electron'
 import cron from 'node-cron'
 
 let currentCronTask: ReturnType<typeof cron.schedule> | null = null
@@ -13,6 +14,10 @@ export const startCronJob = (hour: string, minute: string) => {
 
   currentCronTask = cron.schedule(expr, () => {
     console.log('CRON executed at:', new Date())
+    const win = BrowserWindow.getAllWindows()[0]
+    if (!win) return
+
+    win.webContents.send('cron-trigger')
   })
 
   currentCronTask.start()

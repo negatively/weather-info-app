@@ -25,6 +25,7 @@ declare global {
       copyCaption: (data) => Promise<{ success: boolean; error: string }>
       getSchSettings: () => Promise<ScheduleConfig>
       setSchSettings: (settings: ScheduleConfig) => Promise<boolean>
+      onCronTrigger: (cb: () => void) => Promise<any>
     }
   }
 }

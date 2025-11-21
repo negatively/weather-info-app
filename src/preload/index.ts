@@ -18,7 +18,9 @@ const api = {
   deleteReport: (reportId: string) => ipcRenderer.invoke('delete-report', reportId),
   getReportImage: (filePath: string) => ipcRenderer.invoke('get-report-image', filePath),
   copyImage: (data) => ipcRenderer.invoke('copy-image', data),
-  copyCaption: (data) => ipcRenderer.invoke('copy-caption', data)
+  copyCaption: (data) => ipcRenderer.invoke('copy-caption', data),
+
+  onCronTrigger: (cb: () => void) => ipcRenderer.on('cron-trigger', cb)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

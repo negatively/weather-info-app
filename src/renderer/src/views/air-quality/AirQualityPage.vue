@@ -82,7 +82,7 @@ const showPicker = (event) => {
                 </div>
             </div>
             <div class="pt-4">
-                <button type="submit"
+                <button type="submit" id="btn-generate"
                     class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r  from-yellow-200 from-0% to-green-400 to-50% hover:to-90% text-gray-900 font-bold rounded-lg transition-all duration-300  focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-neutral-900">
                     <img src="@renderer/assets/wand.svg" alt="Logo" class="w-5 h-5" />
                     Generate
