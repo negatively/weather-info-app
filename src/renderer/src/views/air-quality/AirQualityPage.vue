@@ -21,8 +21,13 @@ const caption = "Dengan hormat, berikut kami sampaikan informasi kualitas udara 
 const isLoading = ref(false)
 
 const handleGenerate = async () => {
+    if (date.value == '') {
+        modalMessage.value = "Mohon Isi Tanggal Terlebih Dahulu"
+        showModal.value = true
+        return
+    }
     isLoading.value = true
-    await new Promise(res => setTimeout(res, 1000))
+    await new Promise(res => setTimeout(res, 500))
     const prev = new Date(date.value)
     prev.setDate(prev.getDate() - 1)
     const prevDate = prev.toISOString().slice(0, 10)

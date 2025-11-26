@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, toRaw } from 'vue'
 import { DatabaseConfig, ScheduleConfig } from '@renderer/types/preload';
+import AlertModal from '@renderer/components/AlertModal.vue'
 
 const formData = ref<DatabaseConfig>({
     host: '127.0.0.1',
@@ -27,7 +28,8 @@ const saveSettings = async () => {
     try {
         await window.api.setDbSettings(toRaw(formData.value))
         console.log('Settings saved successfully!')
-        alert('✅ Setting sudah tersimpan');
+        showAlert.value = true
+        alertMessage.value = '✅ Setting sudah tersimpan'
     } catch (error) {
         console.error('Failed to save settings:', error)
     }
@@ -37,7 +39,8 @@ const saveSchSettings = async () => {
     try {
         await window.api.setSchSettings(toRaw(formDataSch.value))
         console.log('Settings schedule saved successfully!')
-        alert('✅ Setting sudah tersimpan');
+        showAlert.value = true
+        alertMessage.value = '✅ Setting sudah tersimpan'
     } catch (error) {
         console.error('Failed to save schedule settings')
     }
@@ -46,8 +49,12 @@ const saveSchSettings = async () => {
 
 const testConnection = async () => {
     const result = await window.api.testDbConnection()
-    alert(result.success ? '✅ ' + result.message : '❌ ' + result.message)
+    showAlert.value = true
+    alertMessage.value = result.success ? '✅ ' + result.message : '❌ ' + result.message
 }
+
+const showAlert = ref(false)
+const alertMessage = ref('')
 
 onMounted(() => {
     loadSettings()
@@ -113,4 +120,5 @@ const showPicker = (event) => {
             </div>
         </form>
     </div>
+    <AlertModal v-model:show="showAlert" title="Info" :message="alertMessage" />
 </template>

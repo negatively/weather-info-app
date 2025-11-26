@@ -96,6 +96,57 @@ export function useCanvasReport() {
     return date.getHours().toString().padStart(2, '0')
   }
 
+  const getCategory = (value: number, type: 'pm25' | 'pm10'): string => {
+    if (type === 'pm25') {
+      if (value >= 0 && value <= 15.5) return 'BAIK'
+      if (value >= 15.6 && value <= 55.4) return 'SEDANG'
+      if (value >= 55.5 && value <= 150.4) return 'TIDAK SEHAT'
+      return 'SANGAT TIDAK SEHAT'
+    } else {
+      if (value >= 0 && value <= 50) return 'BAIK'
+      if (value >= 51 && value <= 150) return 'SEDANG'
+      if (value >= 151 && value <= 350) return 'TIDAK SEHAT'
+      return 'SANGAT TIDAK SEHAT'
+    }
+  }
+
+  const buildConclusion = (data: SummarizeData): string => {
+    const conclusions: string[] = []
+
+    if (data.pm25.avg.toString() !== 'X') {
+      const pm25Category = getCategory(data.pm25.avg, 'pm25')
+      conclusions.push(`PM2.5 berada pada kategori ${pm25Category}`)
+    }
+
+    if (data.pm10.avg.toString() !== 'X') {
+      const pm10Category = getCategory(data.pm10.avg, 'pm10')
+      conclusions.push(`PM10 berada pada kategori ${pm10Category}`)
+    }
+
+    if (conclusions.length === 0) return ''
+    return `Nilai konsentrasi parameter ${conclusions.join(' dan ')}.`
+  }
+
+  const buildExplanation = (data: SummarizeData): string => {
+    const parts: string[] = []
+
+    if (data.pm25.avg.toString() !== 'X') {
+      const pm25Text = `Rata-rata Konsentrasi  PM2.5  sebesar ${data.pm25.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${data.pm25.max}  µg/m3  terjadi pada pukul ${extractHour(data.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.pm25.min} µg/m3 terjadi pada pukul ${extractHour(data.pm25.hourMin)}.`
+      parts.push(pm25Text)
+    }
+
+    if (data.pm10.avg.toString() !== 'X') {
+      const pm10Text = `Rata-rata Konsentrasi  PM10  sebesar ${data.pm10.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${data.pm10.max}  µg/m3  terjadi pada pukul ${extractHour(data.pm10.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.pm10.min} µg/m3 terjadi pada pukul ${extractHour(data.pm10.hourMin)}.`
+      parts.push(pm10Text)
+    }
+
+    // Always include O3
+    const o3Text = `Rata-rata Konsentrasi  O3  sebesar ${data.o3.avg}  ppb. \\nKonsentrasi tertinggi sebesar ${data.o3.max}  ppb  terjadi pada pukul ${extractHour(data.o3.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.o3.min} ppb terjadi pada pukul ${extractHour(data.o3.hourMin)}.`
+    parts.push(o3Text)
+
+    return parts.join('\\n\\n ')
+  }
+
   const initCanvas = (
     summarizeData: Ref<SummarizeData | null>,
     nameInput: Ref<string>,
@@ -142,15 +193,17 @@ export function useCanvasReport() {
         CANVAS_STYLES.positions.description.lineHeight
       )
 
-      const conclusion = 'Nilai konsentrasi parameter PM10 dan PM2.5 berada pada kategori BAIK.'
-      drawWrappedText(
-        ctx,
-        conclusion,
-        CANVAS_STYLES.positions.conclusion.x,
-        CANVAS_STYLES.positions.conclusion.y,
-        CANVAS_STYLES.positions.conclusion.maxWidth,
-        CANVAS_STYLES.positions.conclusion.lineHeight
-      )
+      const conclusion = buildConclusion(summarizeData.value)
+      if (conclusion) {
+        drawWrappedText(
+          ctx,
+          conclusion,
+          CANVAS_STYLES.positions.conclusion.x,
+          CANVAS_STYLES.positions.conclusion.y,
+          CANVAS_STYLES.positions.conclusion.maxWidth,
+          CANVAS_STYLES.positions.conclusion.lineHeight
+        )
+      }
 
       // Draw signature
       ctx.font = CANVAS_STYLES.fonts.bold18
@@ -195,12 +248,13 @@ export function useCanvasReport() {
         ctx.fillRect(908, 665, 106, 55)
 
         // Value
-        ctx.font = CANVAS_STYLES.fonts.bold26
+        ctx.font = CANVAS_STYLES.fonts.bold40
         const data = summarizeData.value
         ctx.fillStyle = getColorTextPM25(data.pm25.avg)
         ctx.fillText(data.pm25.avg.toString(), 250, 730)
         ctx.fillStyle = getColorTextPM10(data.pm10.avg)
         ctx.fillText(data.pm10.avg.toString(), 740, 730)
+        ctx.font = CANVAS_STYLES.fonts.bold26
         ctx.fillStyle = getColorTextPM25(data.pm25.max)
         ctx.fillText(data.pm25.max.toString(), 360, 695)
         ctx.fillStyle = getColorTextPM10(data.pm10.max)
@@ -236,16 +290,17 @@ export function useCanvasReport() {
         ctx.font = CANVAS_STYLES.fonts.normal
         ctx.textAlign = 'left'
         ctx.textBaseline = 'top'
-        const explanation = `Rata-rata Konsentrasi  PM2.5  sebesar ${data.pm25.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${data.pm25.max}  µg/m3  terjadi pada pukul ${extractHour(data.pm25.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.pm25.min} µg/m3 terjadi pada pukul ${extractHour(data.pm25.hourMin)}. \\n\\n Rata-rata Konsentrasi  PM10  sebesar ${data.pm10.avg}  µg/m3. \\nKonsentrasi tertinggi sebesar ${data.pm10.max}  µg/m3  terjadi pada pukul ${extractHour(data.pm10.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.pm10.min} µg/m3 terjadi pada pukul ${extractHour(data.pm10.hourMin)}.\\n\\n Rata-rata Konsentrasi  O3  sebesar ${data.o3.avg}  ppb. \\nKonsentrasi tertinggi sebesar ${data.o3.max}  ppb  terjadi pada pukul ${extractHour(data.o3.hourMax)} \\ndan konsentrasi  terendah sebesar ${data.o3.min} ppb terjadi pada pukul ${extractHour(data.o3.hourMin)}.`
-
-        drawWrappedText(
-          ctx,
-          explanation,
-          CANVAS_STYLES.positions.explanation.x,
-          CANVAS_STYLES.positions.explanation.y,
-          CANVAS_STYLES.positions.explanation.maxWidth,
-          CANVAS_STYLES.positions.explanation.lineHeight
-        )
+        const explanation = buildExplanation(summarizeData.value)
+        if (explanation) {
+          drawWrappedText(
+            ctx,
+            explanation,
+            CANVAS_STYLES.positions.explanation.x,
+            CANVAS_STYLES.positions.explanation.y,
+            CANVAS_STYLES.positions.explanation.maxWidth,
+            CANVAS_STYLES.positions.explanation.lineHeight
+          )
+        }
       }
     }
   }
