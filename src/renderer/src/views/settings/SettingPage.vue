@@ -110,11 +110,11 @@ const showPicker = (event) => {
             <div class="form-group">
                 <label for="host" class="block text-xs mb-1">Jadwal Generate Informasi Kualitas Udara </label>
                 <input type="time" id="host" v-model="formDataSch.air_time"
-                    class="w-full px-3 py-2 border border-zinc-600 rounded-md text-sm" @focus="showPicker" />
+                    class="w-full px-3 py-2 border border-zinc-600 rounded-md text-sm" @focus="showPicker" disabled />
             </div>
 
             <div class="flex justify-end space-x-2">
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" disabled>
                     Save Settings
                 </button>
             </div>

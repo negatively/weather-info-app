@@ -9,18 +9,18 @@ export const startCronJob = (hour: string, minute: string) => {
     currentCronTask = null
   }
 
-  const expr = `${minute} ${hour} * * *`
-  console.log('Cron running with:', expr)
+  // const expr = `${minute} ${hour} * * *`
+  // console.log('Cron running with:', expr)
 
-  currentCronTask = cron.schedule(expr, () => {
-    console.log('CRON executed at:', new Date())
-    const win = BrowserWindow.getAllWindows()[0]
-    if (!win) return
+  // currentCronTask = cron.schedule(expr, () => {
+  //   console.log('CRON executed at:', new Date())
+  //   const win = BrowserWindow.getAllWindows()[0]
+  //   if (!win) return
 
-    win.webContents.send('cron-trigger')
-  })
+  //   win.webContents.send('cron-trigger')
+  // })
 
-  currentCronTask.start()
+  // currentCronTask.start()
 }
 
 export const loadCronOnStartup = (savedTime: string | null) => {
