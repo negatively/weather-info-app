@@ -50,9 +50,9 @@ export const initializeDatabaseHandlers = (
 
       const [o3rows] = await connection.query<RawOzon[]>(
         `
-        SELECT O3, LastUpdate
+        SELECT O3, DATE_ADD(LastUpdate, INTERVAL 7 HOUR) AS LastUpdate
         FROM tblo3_iq
-        WHERE DATE(LastUpdate) = ?
+        WHERE DATE(DATE_ADD(LastUpdate, INTERVAL 7 HOUR)) = ?
         ORDER BY LastUpdate
         `,
         [targetDate]
@@ -60,9 +60,9 @@ export const initializeDatabaseHandlers = (
 
       const [pm25rows] = await connection.query<RawPM25[]>(
         `
-        SELECT PM25, LastUpdate
+        SELECT PM25, DATE_ADD(LastUpdate, INTERVAL 7 HOUR) AS LastUpdate
         FROM tblpm25
-        WHERE DATE(LastUpdate) = ?
+        WHERE DATE(DATE_ADD(LastUpdate, INTERVAL 7 HOUR)) = ?
         ORDER BY LastUpdate
         `,
         [targetDate]
@@ -70,9 +70,9 @@ export const initializeDatabaseHandlers = (
 
       const [pm10rows] = await connection.query<RawPM10[]>(
         `
-        SELECT PM10, LastUpdate
+        SELECT PM10, DATE_ADD(LastUpdate, INTERVAL 7 HOUR) AS LastUpdate
         FROM tblpm10
-        WHERE DATE(LastUpdate) = ?
+        WHERE DATE(DATE_ADD(LastUpdate, INTERVAL 7 HOUR)) = ?
         ORDER BY LastUpdate
         `,
         [targetDate]
