@@ -76,12 +76,12 @@ export async function summarizeDaily(data: HourlySummarize) {
     const maxData = _.maxBy(nonNull, 'avg')
 
     // Apply Math.ceil ONLY when count > 12
-    const applyCeil = (val: number) => (count > 12 ? Math.ceil(val) : val)
+    const applyRound = (val: number) => (count > 12 ? Math.round(val) : val)
 
     return {
-      avg: applyCeil(rawMean),
-      min: applyCeil(minData?.avg ?? 0),
-      max: applyCeil(maxData?.avg ?? 0),
+      avg: applyRound(rawMean),
+      min: applyRound(minData?.avg ?? 0),
+      max: applyRound(maxData?.avg ?? 0),
       hourMin: minData?.hour ?? 'X',
       hourMax: maxData?.hour ?? 'X'
     }
@@ -101,7 +101,7 @@ export async function dataCleansing(data: HourlySummarize, rescaling: boolean) {
   // pm25
   // remove 0 and 9999
   const delValPm25 = _.map(data.pm25, (n: HourlyData) => {
-    return n.avg > 0 && n.avg < 9999 ? n : { ...n, avg: null }
+    return n.avg > 0.5 && n.avg < 9999 ? n : { ...n, avg: null }
   })
 
   // pm10
@@ -114,12 +114,12 @@ export async function dataCleansing(data: HourlySummarize, rescaling: boolean) {
     }
   })
   const delValPm10 = _.map(absPm10, (n: HourlyData) => {
-    return n.avg > 0 && n.avg < 9999 ? n : { ...n, avg: null }
+    return n.avg > 0.5 && n.avg < 9999 ? n : { ...n, avg: null }
   })
   // o3
   // remove 0 and 9999
   const delValO3 = _.map(data.o3, (n: HourlyData) => {
-    return n.avg > 0 && n.avg < 9999 ? n : { ...n, avg: null }
+    return n.avg > 0.5 && n.avg < 9999 ? n : { ...n, avg: null }
   })
 
   const response: HourlySummarize = {

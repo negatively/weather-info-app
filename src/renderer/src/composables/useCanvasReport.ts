@@ -110,7 +110,7 @@ export function useCanvasReport() {
     }
   }
 
-  const buildConclusion = (data: SummarizeData): string => {
+  const buildConclusion = (data: any): string => {
     const conclusions: string[] = []
 
     if (data.pm25.avg.toString() !== 'X') {
